@@ -3,7 +3,10 @@ library(sf)
 
 florida <- vect("/Users/evandadson/Downloads/plss_tr_2004/plss_tr_2004.shp", crs = "+proj=lcc +lat_0=42.5 +lon_0=-100 +lat_1=25 +lat_2=60 +x_0=0 +y_0=0 +ellps=WGS84 +units=m +no_defs")
 
-outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+# outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+
+# Testing Raster creation
+test_out <- "/Users/evandadson/Desktop/test"
 
 for (year in 2011:2021) {
   prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))
@@ -21,6 +24,6 @@ for (year in 2011:2021) {
   tsv_values <- tsv(tmin, tmax)
   prcp_values <- psv(prcp)
   
-  writeRaster(tsv_values, paste0(outpath, "temp_", year, "_", day, ".tif"))
-  writeRaster(prcp_values, paste0(outpath, "prcp_", year, "_", day, ".tif"))
+  writeRaster(tsv_values, paste0(test_out, "temp_", year, "_", day, ".tif"))
+  writeRaster(prcp_values, paste0(test_out, "prcp_", year, "_", day, ".tif"))
 }
