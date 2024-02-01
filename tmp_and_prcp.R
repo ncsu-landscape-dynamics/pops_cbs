@@ -1,8 +1,7 @@
 library(terra)
-library(doParallel)
-library(foreach)
+# library(lubridate)
 
-# Temperature germination everity function
+# Temperature germination severity function
 tsv <- function(tmean) {
   tsv_values <- ifelse(tmean <= 12, 0,
                             ifelse(tmean > 12 & tmean < 32, 100*(-0.07+0.88*(exp(-0.5*(log(tmean/23.08)/0.28)^2))),
@@ -16,61 +15,81 @@ psv <- function(prcp) {
   return(prcp_values)
 }
 
-# Read in florida plss data
+# Florida shapefile
 florida <- vect("/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/cb_2018_us_state_20m/cb_2018_us_state_20m.shp")
 florida <- florida[florida$NAME == "Florida"]
-# outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-# Testing Raster creation
-test_out <- "/Users/evandadson/Desktop/test/"
+# Path to file output location
+outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-files = list.files(path= '/Volumes/cmjone25/Data/Original/Daymet/precip', pattern="\\.nc4$", full.names = TRUE)
-precip <- lapply(files, rast)
-
-files = list.files(path= '/Volumes/cmjone25/Data/Original/Daymet/tmin', pattern="\\.nc4$", full.names = TRUE)
-temp_min <- lapply(files, rast)
-
-files = list.files(path= '/Volumes/cmjone25/Data/Original/Daymet/tmax', pattern="\\.nc4$", full.names = TRUE)
-temp_max <- lapply(files, rast)
-
-for (i in 32:38) {
-    # prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", years, "_na.nc4"))[[i]]
-    # tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", years, "_na.nc4"))[[i]]
-    # tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", years, "_na.nc4"))[[i]]
-  i <- 32
-  prcp <- rast(files[[i]])
-
-  florida <- terra::project(florida, prcp)
-  # # Project prcp to the crs of florida
-  # prcp <- project(prcp, crs(florida))
-
-  # Crop precip raster to florida extent
-  prcp <- terra::crop(prcp, florida)
-
-  # # Project prcp to the crs of florida
-  # prcp <- project(prcp, crs(florida))
-
-  # Reclassify precipitation values of raster
-  psv_values <- app(prcp, fun = psv)
-
-  # Assign values of raster to reclassified values
-  values(prcp) <- psv_values
-
-  ## Temperature rasters
-  tmin <- terra::crop(temp_min[[i]], florida)
-  tmax <- terra::crop(temp_max[[i]], florida)
-
-  tmin <- project(tmin, crs(florida))
-  tmax <- project(tmax, crs(florida))
-
-  tmean <- (values(tmin) + values(tmax)) / 2
-
-  values(tmin) <- tmean
-
-  tsv_values <- apply(tmean, MARGIN = c(1,2), FUN = tsv)
-
-  values(tmin) <- tsv_values
-
-  writeRaster(prcp, paste0(test_out, "temp_coeff_", i+1979, "_.tif"), overwrite = TRUE)
-  writeRaster(tmin, paste0(test_out, "prcp_coeff_", i+1979, "_.tif"), overwrite = TRUE)
+# Create temp and prcp rasters for each year and day
+for (year in 2011:2017) {
+  for (day in 1:365) {
+    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))[[day]]
+    tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))[[day]]
+    tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))[[day]]
+    
+    # Project florida onto prcp crs
+    florida <- terra::project(florida, prcp)
+    
+    # Crop prcp raster to florida extent
+    prcp <- terra::crop(prcp, florida)
+    
+    # Apply precipitation indicator function to raster
+    psv_values <- app(prcp, fun = psv)
+    
+    # Crop temp rasters to florida extent
+    tmin <- terra::crop(tmin, florida)
+    tmax <- terra::crop(tmax, florida)
+    
+    # Calculate mean temperature
+    tmean <- (tmin + tmax) / 2
+    
+    # Apply temperature severity function to raster
+    tsv_values <- app(tmean, fun = tsv)
+    
+    writeRaster(psv_values, paste0(test_out, "temp_coeffs_", year, "/", "temp_coeff_", year, "_", day, "_.tif"), overwrite = TRUE)
+    writeRaster(tsv_values, paste0(test_out, "prcp_coeffs_", year, "/", "prcp_coeff_", year, "_", day, "_.tif"), overwrite = TRUE)
+  }
 }
+
+
+# # Testing Raster creation
+# test_out <- "/Users/evandadson/Desktop/test/"
+# 
+# prcp_files = list.files(path= '/Volumes/cmjone25/Data/Original/Daymet/precip', pattern="\\.nc4$", full.names = TRUE)
+# #precip <- lapply(files, rast)
+# 
+# tmin_files = list.files(path= '/Volumes/cmjone25/Data/Original/Daymet/tmin', pattern="\\.nc4$", full.names = TRUE)
+# #temp_min <- lapply(files, rast)
+# 
+# tmax_files = list.files(path= '/Volumes/cmjone25/Data/Original/Daymet/tmax', pattern="\\.nc4$", full.names = TRUE)
+# #temp_max <- lapply(files, rast)
+# 
+# cl <- makeCluster(7)
+# registerDoParallel(cl)
+# for (i in 32:38) {
+#   prcp <- rast(prcp_files[[i]])
+#   tmin <- rast(tmin_files[[i]])
+#   tmax <- rast(tmax_files[[i]])
+# 
+#   florida <- terra::project(florida, prcp)
+# 
+#   ## Precipitation rasters
+#   # Crop precip raster to florida extent
+#   prcp <- terra::crop(prcp, florida)
+# 
+#   # Reclassify precipitation values of raster
+#   psv_values <- app(prcp, fun = psv)
+# 
+#   ## Temperature rasters
+#   tmin <- terra::crop(tmin, florida)
+#   tmax <- terra::crop(tmax, florida)
+#   
+#   tmean <- (tmin + tmax) / 2
+# 
+#   tsv_values <- app(tmean, fun = tsv)
+# 
+#   writeRaster(psv_values, paste0(test_out, "temp_coeff_", year(time(prcp)[i-31]), "_.tif"), overwrite = TRUE)
+#   writeRaster(tsv_values, paste0(test_out, "prcp_coeff_", year(time(prcp)[i-31]), "_.tif"), overwrite = TRUE)
+# }
