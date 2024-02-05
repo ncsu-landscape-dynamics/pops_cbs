@@ -38,7 +38,7 @@ for (year in seq(start_year, end_year)) {
   for (day in 1:days_per_year) {
     
     # Read rasters
-    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", 2011, "_na.nc4"))[[18]]
+    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))[[day]]
     tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))[[day]]
     tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))[[day]]
     
