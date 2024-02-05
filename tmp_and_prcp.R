@@ -5,8 +5,8 @@ library(terra)
 # Path to file output location
 outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 start_year <- 2011
-end_year <- 2011
-days_per_year <- 30
+end_year <- 2017
+days_per_year <- 365
 
 
 
