@@ -6,13 +6,12 @@ library(terra)
 outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 start_year <- 2011
 end_year <- 2017
-days_per_year <- 365
 
 
 
 # Temperature germination function
 temp_fun <- function(tmean) {
-  temp_values <- ifelse(tmean > 12 & tmean < 32, 100*(-0.07+0.88*(exp(-0.5*(log(tmean/23.08)/0.28)^2))), 0)
+  temp_values <- terra::ifel(tmean > 12 & tmean < 32, 100*(-0.07+0.88*(exp(-0.5*(log(tmean/23.08)/0.28)^2))), 0)
   return(temp_values)
 }
 
@@ -20,7 +19,7 @@ temp_fun <- function(tmean) {
 
 # Precipitation indicator function
 prcp_fun <- function(prcp) {
-  prcp_values <- ifelse(prcp < 0.25, 0, 1)
+  prcp_values <- terra::ifel(prcp < 0.25, 0, 1)
   return(prcp_values)
 }
 
@@ -34,13 +33,11 @@ florida <- florida[florida$NAME == "Florida"]
 
 # Create temp and prcip raster files for each year and day
 for (year in seq(start_year, end_year)) {
-  
-  for (day in 1:days_per_year) {
     
     # Read rasters
-    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", 2011, "_na.nc4"))[[18]]
-    tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))[[day]]
-    tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))[[day]]
+    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))
+    tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))
+    tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))
     
     # Project florida onto prcp crs
     florida <- terra::project(florida, prcp)
@@ -49,7 +46,7 @@ for (year in seq(start_year, end_year)) {
     prcp <- terra::crop(prcp, florida)
     
     # Apply precipitation indicator function to raster
-    prcp_values <- app(prcp, fun = prcp_fun)
+    prcp_values <- prcp_fun(prcp)
     
     # Crop temp rasters to florida extent
     tmin <- terra::crop(tmin, florida)
@@ -58,15 +55,14 @@ for (year in seq(start_year, end_year)) {
     # Calculate mean temperature
     tmean <- (tmin + tmax) / 2
     
-    # Apply temperature severity function to raster
-    temp_values <- app(tmean, fun = temp_fun)
+    # Apply temperature germination function to raster
+    temp_values <- temp_fun(tmean)
     
     # Write rasters
-    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, "_", day, "_.tif"), overwrite = TRUE)
-    writeRaster(temp_values, paste0(outtpath, "temp/","temp_coeff_", year, "_", day, "_.tif"), overwrite = TRUE)
-    
-  }
+    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, "_.tif"), overwrite = TRUE)
+    writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, "_.tif"), overwrite = TRUE)
   
 }
+
 
 
