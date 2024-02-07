@@ -33,34 +33,40 @@ florida <- florida[florida$NAME == "Florida"]
 
 # Create temp and prcip raster files for each year and day
 for (year in seq(start_year, end_year)) {
-    
-    # Read rasters
-    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))
-    tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))
-    tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))
-    
-    # Project florida onto prcp crs
-    florida <- terra::project(florida, prcp)
-    
-    # Crop prcp raster to florida extent
-    prcp <- terra::crop(prcp, florida)
-    
-    # Apply precipitation indicator function to raster
-    prcp_values <- prcp_fun(prcp)
-    
-    # Crop temp rasters to florida extent
-    tmin <- terra::crop(tmin, florida)
-    tmax <- terra::crop(tmax, florida)
-    
-    # Calculate mean temperature
-    tmean <- (tmin + tmax) / 2
-    
-    # Apply temperature germination function to raster
-    temp_values <- temp_fun(tmean)
-    
-    # Write rasters
-    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, "_.tif"), overwrite = TRUE)
-    writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, "_.tif"), overwrite = TRUE)
+  
+  # Read rasters
+  <<<<<<< HEAD
+  prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))
+  tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))
+  tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))
+  =======
+    prcp <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))[[day]]
+  tmax <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))[[day]]
+  tmin <- rast(paste0("/Volumes/cmjone25/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))[[day]]
+  >>>>>>> 26074cfa1863ab7cbb8c4c15529605e105e3946c
+  
+  # Project florida onto prcp crs
+  florida <- terra::project(florida, prcp)
+  
+  # Crop prcp raster to florida extent
+  prcp <- terra::crop(prcp, florida)
+  
+  # Apply precipitation indicator function to raster
+  prcp_values <- prcp_fun(prcp)
+  
+  # Crop temp rasters to florida extent
+  tmin <- terra::crop(tmin, florida)
+  tmax <- terra::crop(tmax, florida)
+  
+  # Calculate mean temperature
+  tmean <- (tmin + tmax) / 2
+  
+  # Apply temperature germination function to raster
+  temp_values <- temp_fun(tmean)
+  
+  # Write rasters
+  writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, "_.tif"), overwrite = TRUE)
+  writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, "_.tif"), overwrite = TRUE)
   
 }
 
