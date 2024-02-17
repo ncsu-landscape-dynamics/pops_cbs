@@ -1,5 +1,5 @@
 library(terra)
-library(lubridate)
+#library(lubridate)
 
 
 
@@ -111,8 +111,8 @@ infection_rast <- function(x, cbs_host) {
 
 
 # Host raster
-cbs <- read.csv("/Volumes/cmjone25/Data/Original/pest-occurrence/Citrus_Black_Spot/MasterCBS2022.csv")
-cbs_host <- vect("/Volumes/cmjone25/Data/Original/pest-occurrence/Citrus_Black_Spot/CHRPMultiBlocks.shp")
+cbs <- read.csv("/Users/evandadson/Library/CloudStorage/GoogleDrive-edadson@ncsu.edu/Shared drives/Data/Original/pest-occurrence/Citrus_Black_Spot/MasterCBS2022.csv")
+cbs_host <- vect("/Users/evandadson/Library/CloudStorage/GoogleDrive-edadson@ncsu.edu/Shared drives/Data/Original/pest-occurrence/Citrus_Black_Spot/CHRPMultiBlocks.shp")
 
 cbs$Long = abs(cbs$Long)
 cbs$count = 1
@@ -120,28 +120,15 @@ cbs_host$area = 1
 
 for (year in seq(start_year, end_year)) {
   cbs_year <- cbs[grep(year, as.Date(cbs$Receive.Date, format = "%m/%d/%y")),]
-  inf_vect<-vect(cbs_year, geom = c("Long", "Lat"), crs = crs(cbs_host))
+  inf_vect<-vect(cbs_year, geom = c("Long", "Lat"), 
+                 crs = "+proj=longlat +datum=WGS84")
   #values(inf_vect) <- cbs[,c("Receive.Date","count")]
-  inf_rast <- rast(inf_vect, ncol = 100, nrow = 100, nlyr = 365, crs = crs(cbs_host))
-  cbs_rast <- rasterize(inf_vect, inf_rast, field = "count", time = "Receive.Date")
+  inf_rast <- rast(inf_vect, ncol = 1000, nrow = 1000, nlyr = 365, 
+                   crs = "+proj=longlat +datum=WGS84")
+  cbs_rast <- rasterize(inf_vect, inf_rast, field = "count", 
+                        time = "Receive.Date")
   cbs_inf <- infection_rast(cbs_rast, cbs_host)
   assign(paste0("cbs_", year), cbs_inf)
-}
-
-
-
-# Function to take create raster of host data
-host_rast <- function(z, cbs_data) {
-  #' host_ext
-  #'
-  #' Description
-  #' @param z spatRaster
-  #' @param cbs_data spatVector containing spatial polygons of host species
-  #' @return spatRaster mapped to extent of cbs hosts
-  cbs_host <- project(cbs_host, crs(z))
-  host_data <- rasterize(cbs_host, z, field = "area", cover = TRUE)
-  host_data <- host_data*100
-  return(host_data)
 }
 
 
