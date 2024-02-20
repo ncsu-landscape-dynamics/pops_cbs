@@ -1,4 +1,4 @@
-host_rast <- function(z, cbs_data) {
+host_rast <- function(z, cbs_host) {
   #' host_ext
   #'
   #' Description
