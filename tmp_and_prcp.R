@@ -104,7 +104,7 @@ infection_rast <- function(x, cbs_host) {
   #ext(x) <- ext(cbs_host)
   host_data <- rasterize(cbs_host, x, field = "area", cover = TRUE)
   host_data <- host_data*100
-  host_data <- resample(host_data, x)
+  #host_data <- resample(host_data, x)
   return(host_data)
 }
 
