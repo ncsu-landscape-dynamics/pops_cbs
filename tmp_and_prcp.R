@@ -1,5 +1,4 @@
 library(terra)
-#library(lubridate)
 
 
 
@@ -102,9 +101,10 @@ infection_rast <- function(x, cbs_host) {
   #' @param x spatRaster containing CBS occurrence data
   #' @param cbs_data spatVector containing spatial polygons of host species
   #' @return spatRaster mapped to extent of cbs hosts
-  ext(x) <- ext(cbs_host)
+  #ext(x) <- ext(cbs_host)
   host_data <- rasterize(cbs_host, x, field = "area", cover = TRUE)
   host_data <- host_data*100
+  host_data <- resample(host_data, x)
   return(host_data)
 }
 
@@ -119,17 +119,17 @@ cbs$count = 1
 cbs_host$area = 1
 
 for (year in seq(start_year, end_year)) {
+  
+  # Split based on year
   cbs_year <- cbs[grep(year, as.Date(cbs$Receive.Date, format = "%m/%d/%y")),]
-  inf_vect<-vect(cbs_year, geom = c("Long", "Lat"), 
-                 crs = "+proj=longlat +datum=WGS84")
-  #values(inf_vect) <- cbs[,c("Receive.Date","count")]
-  inf_rast <- rast(inf_vect, ncol = 1000, nrow = 1000, nlyr = 365, 
-                   crs = "+proj=longlat +datum=WGS84")
-  cbs_rast <- rasterize(inf_vect, inf_rast, field = "count", 
-                        time = "Receive.Date")
-  cbs_inf <- infection_rast(cbs_rast, cbs_host)
-  assign(paste0("cbs_", year), cbs_inf)
+  
+  # Convert to raster with longlat referenced coordinates
+  cbs_rast <- rast(cbs_year, type = "xzy", crs = crs(cbs_host), 
+                   extent = ext(cbs_host), digits = 6)
+
+  names(cbs_rast) = "count"
+  values(cbs_rast) = 1
+  cbs_host_rast <- infection_rast(cbs_rast, cbs_host)
+  #cbs_inf <- infection_rast(cbs_rast, cbs_host)
+  assign(paste0("cbs_", year), cbs_host_rast)
 }
-
-
-
