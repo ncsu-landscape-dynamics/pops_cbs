@@ -39,24 +39,24 @@ host_rast <- function(z, cbs_host) {
 weather <- rast("/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/precip/prcp_coeff_2016_.tif")
 host <- weather[[1]]
 host_cbs <- host_rast(weather, cbs_host)
-writeRaster(host_cbs, paste0(outpath, "host/host.tiff"))
+writeRaster(host_cbs, paste0(outpath, "host/host.tiff"), overwrite = T)
 
 # Yearly infection
 for (year in seq(start_year, end_year)) {
   sp <- cbs[grep(year, as.Date(cbs$Receive.Date, format = "%m/%d/%y")),]
   sp1 <- vect(sp, geom = c("Long", "Lat"), crs=crs(cbs_host))
-  host<-project(host,crs(sp1))
+  sp1 <- project(sp1, crs(host))
   infections_year <- terra::rasterize(sp1, host, field = "positive", fun = sum)
-  infections_year <- project(infections_year, crs(weather))
-  writeRaster(infections_year, paste0(outpath, "infection/cbs_", year, ".tiff"))
+  writeRaster(infections_year, paste0(outpath, "infection/cbs_", year, ".tiff"),
+              overwrite = T)
 }
 
 # Seasonal infection
 for (season in 1:13) {
   sp <- cbs[cbs$Season == season,]
   sp1 <- vect(sp, geom = c("Long", "Lat"), crs = crs(cbs_host))
-  host<-project(host,crs(sp1))
+  sp1 <- project(sp1, crs(host))
   infections_season <- terra::rasterize(sp1, host, field = "positive", fun = sum)
-  infections_season <- project(infections_season, crs(weather))
-  writeRaster(infections_year, paste0(outpath, "infection/cbs_", season, ".tiff"))
+  writeRaster(infections_year, paste0(outpath, "infection/cbs_", season, ".tiff"),
+              overwrite = T)
 }
