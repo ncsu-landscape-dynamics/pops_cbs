@@ -1,12 +1,19 @@
+# Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., Skrip, M., Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021. Iteratively forecasting biological invasions with PoPS and a little help from our friends. Frontiers in Ecology and the Environment DOI: 10.1002/fee.2357
 
 install.packages("remotes")
 remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
+library(terra)
 
-cbs_path = "/Volumes/rs1/researchers/c/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs"
+cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+
+# write.csv("pest_host_table.csv")
+# write.csv("competency_table.csv")
+# pest_host <- as.data.frame(host)
+# pest_host <- rbind(which(!is.na(new)), new[!is.na(new)])
 
 PoPS::calibrate(
-  infected_years_file = list.files(path = paste0(cbs_path, "infection/"), pattern = "\\.tiff"),
+  infected_years_file = rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff"))[-c(1)]),
   number_of_observations = 1,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
@@ -14,22 +21,22 @@ PoPS::calibrate(
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
   generation_size = 1000,
-  pest_host_table = "",
-  competency_table = "",
-  infected_file_list = "",
-  host_file_list = list.files(path = paste0(cbs_path, "host/"), pattern = "\\.tiff"),
-  total_populations_file = "",
+  pest_host_table,
+  competency_table,
+  infected_file_list = paste0(cbs_path, "infection/cbs_2010.tiff"),
+  host_file_list = paste0(cbs_path, "host/host.tiff"),
+  total_populations_file = paste0(cbs_path, "host/host.tiff"),
   temp = TRUE,
-  temperature_coefficient_file = list.files(path = paste0(cbs_path, "temp/"), pattern = "\\.tiff"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010_.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = list.files(path = paste0(cbs_path, "precip/"), pattern = "\\.tiff"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = "day",
-  season_month_start = 1,
-  season_month_end = 12,
+  time_step = 'day',
+  season_month_start = 9,
+  season_month_end = 7,
   start_date = "2010-01-01",
-  end_date = "2022-12-31",
+  end_date = "2010-12-31",
   use_survival_rates = FALSE,
   survival_rate_month = 3,
   survival_rate_day = 15,
@@ -40,7 +47,7 @@ PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "year",
   mortality_frequency_n = 1,
-  management = FALSE,
+  management = TRUE,
   treatment_dates = c('2010_05_01','2010_06_01','2010_07_01','2010_08_10','2010_09_19'),
   treatments_file = "",
   treatment_method = "ratio",
@@ -50,8 +57,8 @@ PoPS::calibrate(
   natural_kappa = 0,
   anthropogenic_dir = "NONE",
   anthropogenic_kappa = 0,
-  pesticide_duration = c(0),
-  pesticide_efficacy = c(30,30,40,40,40),
+  pesticide_duration = c(30,30,40,40,40),
+  pesticide_efficacy = 0.829,
   mask = NULL,
   output_frequency = "year",
   output_frequency_n = 1,
@@ -76,7 +83,7 @@ PoPS::calibrate(
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "summary_outputs",
-  output_folder_path = cbs_path,
+  output_folder_path = paste0(cbs_path, "outputs/"),
   network_filename = "",
   network_movement = "walk",
   success_metric = "mcc",
