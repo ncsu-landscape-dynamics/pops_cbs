@@ -1,4 +1,7 @@
-# Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., Skrip, M., Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021. Iteratively forecasting biological invasions with PoPS and a little help from our friends. Frontiers in Ecology and the Environment DOI: 10.1002/fee.2357
+# Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., Skrip, M.,
+# Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021. Iteratively forecasting
+# biological invasions with PoPS and a little help from our friends. Frontiers
+# in Ecology and the Environment DOI: 10.1002/fee.2357
 
 install.packages("remotes")
 remotes::install_github("ncsu-landscape-dynamics/rpops")
@@ -7,11 +10,10 @@ library(terra)
 
 cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-# write.csv("pest_host_table.csv")
-# write.csv("competency_table.csv")
-# pest_host <- as.data.frame(host)
-# pest_host <- rbind(which(!is.na(new)), new[!is.na(new)])
+total_pops_file = terra::rast(paste0(cbs_path, "host/host.tiff"))
+values(total_pops_file) = 100
 
+# Calibration for PoPS model
 PoPS::calibrate(
   infected_years_file = rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff"))[-c(1)]),
   number_of_observations = 1,
@@ -20,12 +22,12 @@ PoPS::calibrate(
   prior_cov_matrix = matrix(0, 6, 6),
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
-  generation_size = 1000,
-  pest_host_table,
-  competency_table,
+  generation_size = 10,
+  pest_host_table = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/pest_host_table_cbs.csv",
+  competency_table = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/competency_table_cbs.csv",
   infected_file_list = paste0(cbs_path, "infection/cbs_2010.tiff"),
   host_file_list = paste0(cbs_path, "host/host.tiff"),
-  total_populations_file = paste0(cbs_path, "host/host.tiff"),
+  total_populations_file = total_pops_file,
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010_.tif"),
   precip = TRUE,
@@ -48,8 +50,16 @@ PoPS::calibrate(
   mortality_frequency = "year",
   mortality_frequency_n = 1,
   management = TRUE,
-  treatment_dates = c('2010_05_01','2010_06_01','2010_07_01','2010_08_10','2010_09_19'),
-  treatments_file = "",
+  treatment_dates = c('2010_05_01',
+                      '2010_06_01',
+                      '2010_07_01',
+                      '2010_08_10',
+                      '2010_09_19'),
+  treatments_file = c(paste0(cbs_path, "host/host.tiff"),
+                      paste0(cbs_path, "host/host.tiff"),
+                      paste0(cbs_path, "host/host.tiff"),
+                      paste0(cbs_path, "host/host.tiff"),
+                      paste0(cbs_path, "host/host.tiff")),
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
@@ -103,20 +113,86 @@ PoPS::calibrate(
 )
 
 
-pops_multirun(infected_file_list = list.files(path = paste0(path, "infection/"), pattern = "\\.tiff"),
-              host_file_list = list.files(path = paste0(path, "host/"), pattern = "\\.tiff"),
-              temp = TRUE,
-              temperature_coefficient_file = list.files(path = paste0(path, "temp/"), pattern = "\\.tiff"),
-              precip = TRUE,
-              precipitation_coefficient_file = list.files(path = paste0(path, "precip/"), pattern = "\\.tiff"),
-              time_step = 'day',
-              season_month_start = 9,
-              season_month_end = 4,
-              start_date = '2010-03-10',
-              end_date = '2010-12-31',
-              treatment_dates = c('2010_05_01','2010_06_01','2010_07_01','2010_08_10','2010_09_19'),
-              pesticide_duration = c(30,30,40,40,40),
-              pesticide_efficacy = 0.897,
-              output_folder_path = "/Volumes/rs1/researchers/c/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs")
 
-path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+pops_multirun(
+  infected_file_list = paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff")),
+  host_file_list = paste0(cbs_path, "host/host.tiff"),
+  total_populations_file,
+  parameter_means,
+  parameter_cov_matrix,
+  pest_host_table,
+  competency_table,
+  temp = TRUE,
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010_.tif"),
+  precip = TRUE,
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
+  model_type = "SI",
+  latency_period = 0,
+  time_step = "day",
+  season_month_start = 9,
+  season_month_end = 7,
+  start_date = "2010-01-01",
+  end_date = "2022-12-31",
+  use_survival_rates = FALSE,
+  survival_rate_month = 3,
+  survival_rate_day = 15,
+  survival_rates_file = "",
+  use_lethal_temperature = FALSE,
+  temperature_file = "",
+  lethal_temperature = -12.87,
+  lethal_temperature_month = 1,
+  mortality_frequency = "year",
+  mortality_frequency_n = 1,
+  management = FALSE,
+  treatment_dates = c(""),
+  treatments_file = "",
+  treatment_method = "ratio",
+  natural_kernel_type = "cauchy",
+  anthropogenic_kernel_type = "cauchy",
+  natural_dir = "NONE",
+  anthropogenic_dir = "NONE",
+  number_of_iterations = 100,
+  number_of_cores = NA,
+  pesticide_duration = 0,
+  pesticide_efficacy = 1,
+  random_seed = NULL,
+  output_frequency = "year",
+  output_frequency_n = 1,
+  movements_file = "",
+  use_movements = FALSE,
+  start_exposed = FALSE,
+  generate_stochasticity = TRUE,
+  establishment_stochasticity = TRUE,
+  movement_stochasticity = TRUE,
+  dispersal_stochasticity = TRUE,
+  establishment_probability = 0.5,
+  dispersal_percentage = 0.99,
+  quarantine_areas_file = "",
+  use_quarantine = FALSE,
+  use_spreadrates = FALSE,
+  use_overpopulation_movements = FALSE,
+  overpopulation_percentage = 0,
+  leaving_percentage = 0,
+  leaving_scale_coefficient = 1,
+  exposed_file_list = "",
+  mask = NULL,
+  write_outputs = "None",
+  output_folder_path = "",
+  network_filename = "",
+  network_movement = "walk",
+  use_initial_condition_uncertainty = FALSE,
+  use_host_uncertainty = FALSE,
+  weather_type = "deterministic",
+  temperature_coefficient_sd_file = "",
+  precipitation_coefficient_sd_file = "",
+  dispersers_to_soils_percentage = 0,
+  quarantine_directions = "",
+  multiple_random_seeds = FALSE,
+  file_random_seeds = NULL,
+  use_soils = FALSE,
+  soil_starting_pest_file = "",
+  start_with_soil_populations = FALSE,
+  county_level_infection_data = FALSE
+)
+
+
