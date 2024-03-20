@@ -8,7 +8,7 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
 total_pops_file = terra::rast(paste0(cbs_path, "host/host.tiff"))
 values(total_pops_file) = 100
