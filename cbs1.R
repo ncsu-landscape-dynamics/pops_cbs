@@ -18,7 +18,7 @@ writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite 
 # Calibration for PoPS model
 PoPS::calibrate(
   infected_years_file = terra::rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tif"))[-c(1)]),
-  number_of_observations = 32,
+  number_of_observations = 1,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
