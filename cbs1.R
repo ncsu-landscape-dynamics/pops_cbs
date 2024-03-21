@@ -14,13 +14,11 @@ total_pops_file = terra::rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
 
-infected_years_file = terra::rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tif"))[-c(1)])
-writeRaster(infected_years_file, paste0(cbs_path, "inf_years_file1.tif"), overwrite = T)
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = rast(paste0(cbs_path, "inf_years_file1.tif")),
-  number_of_observations = 1,
+  infected_years_file = terra::rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tif"))[-c(1)]),
+  number_of_observations = 32,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
@@ -99,7 +97,7 @@ PoPS::calibrate(
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "summary_outputs",
-  output_folder_path = paste0(cbs_path, "outputs/"),
+  output_folder_path = paste0(cbs_path, "outputs"),
   network_filename = "",
   network_movement = "walk",
   success_metric = "mcc",
