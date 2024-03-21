@@ -10,13 +10,17 @@ library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-total_pops_file = terra::rast(paste0(cbs_path, "host/host.tiff"))
-values(total_pops_file) = 100
+total_pops_file = terra::rast(paste0(cbs_path, "host/host.tif"))
+total_pops_file = 100*total_pops_file*(1/total_pops_file)
+writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
+
+infected_years_file = terra::rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tif"))[-c(1)])
+writeRaster(infected_years_file, paste0(cbs_path, "inf_years_file1.tif"), overwrite = T)
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff"))[-c(1)]),
-  number_of_observations = 32,
+  infected_years_file = rast(paste0(cbs_path, "inf_years_file1.tif")),
+  number_of_observations = 1,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
@@ -25,9 +29,9 @@ PoPS::calibrate(
   generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
-  infected_file_list = paste0(cbs_path, "infection/cbs_2010.tiff"),
-  host_file_list = paste0(cbs_path, "host/host.tiff"),
-  total_populations_file = total_pops_file,
+  infected_file_list = paste0(cbs_path, "infection/cbs_2010.tif"),
+  host_file_list = paste0(cbs_path, "host/host.tif"),
+  total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010_.tif"),
   precip = TRUE,
@@ -56,12 +60,12 @@ PoPS::calibrate(
                       '2010_07_01',
                       '2010_08_01',
                       '2010_09_01'),
-  treatments_file = c(paste0(cbs_path, "host/host.tiff"),
-                      paste0(cbs_path, "host/host.tiff"),
-                      paste0(cbs_path, "host/host.tiff"),
-                      paste0(cbs_path, "host/host.tiff"),
-                      paste0(cbs_path, "host/host.tiff"),
-                      paste0(cbs_path, "host/host.tiff")),
+  treatments_file = c(paste0(cbs_path, "host/host.tif"),
+                      paste0(cbs_path, "host/host.tif"),
+                      paste0(cbs_path, "host/host.tif"),
+                      paste0(cbs_path, "host/host.tif"),
+                      paste0(cbs_path, "host/host.tif"),
+                      paste0(cbs_path, "host/host.tif")),
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
