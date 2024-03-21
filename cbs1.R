@@ -16,13 +16,13 @@ values(total_pops_file) = 100
 # Calibration for PoPS model
 PoPS::calibrate(
   infected_years_file = rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff"))[-c(1)]),
-  number_of_observations = 1,
+  number_of_observations = 32,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
-  generation_size = 10,
+  generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
   infected_file_list = paste0(cbs_path, "infection/cbs_2010.tiff"),
