@@ -60,3 +60,10 @@ for (season in 1:13) {
   writeRaster(infections_year, paste0(outpath, "infection/cbs_", season, ".tiff"),
               overwrite = T)
 }
+
+# Infected years files for calibration
+for (i in 1:13) {
+  infected_years_list <- paste0(outpath, "infection/", list.files(paste0(outpath, "infection/"), pattern = "*.tif"))[-c(i)]
+  infected_years_rast <- terra::rast(infected_years_list)
+  writeRaster(infected_years_rast, paste0(outpath, "inf_years_file", i, ".tif"), overwrite=T)
+}
