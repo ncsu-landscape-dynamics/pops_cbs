@@ -25,7 +25,7 @@ prcp_fun <- function(prcp) {
 
 
 
-# Florida boundary
+# US Census. 2019. “TIGER/Line Shapefiles.” Accessed on Feb 22, 2024.
 florida <- vect("/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/cb_2018_us_state_20m/cb_2018_us_state_20m.shp")
 florida <- florida[florida$NAME == "Florida"]
 
