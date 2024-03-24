@@ -17,8 +17,8 @@ writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite 
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = terra::rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tif"))[-c(1)]),
-  number_of_observations = 1,
+  infected_years_file = paste0(cbs_path, "inf_years_file1.tif"),
+  number_of_observations = 32,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
@@ -36,7 +36,7 @@ PoPS::calibrate(
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'day',
+  time_step = 'week',
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2010-01-01",
@@ -49,9 +49,9 @@ PoPS::calibrate(
   temperature_file = "",
   lethal_temperature = -12.87,
   lethal_temperature_month = 1,
-  mortality_frequency = "year",
+  mortality_frequency = "week",
   mortality_frequency_n = 1,
-  management = TRUE,
+  management = FALSE,
   treatment_dates = c('2010_04_01',
                       '2010_05_01',
                       '2010_06_01',
@@ -74,7 +74,7 @@ PoPS::calibrate(
   pesticide_duration = c(30,30,30,30,30,30),
   pesticide_efficacy = 0.829,
   mask = NULL,
-  output_frequency = "year",
+  output_frequency = "week",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
@@ -96,7 +96,7 @@ PoPS::calibrate(
   number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = "summary_outputs",
+  write_outputs = "None",
   output_folder_path = paste0(cbs_path, "outputs"),
   network_filename = "",
   network_movement = "walk",
@@ -115,5 +115,4 @@ PoPS::calibrate(
   start_with_soil_populations = FALSE,
   county_level_infection_data = FALSE
 )
-
 
