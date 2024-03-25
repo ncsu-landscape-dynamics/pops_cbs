@@ -10,14 +10,11 @@ library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-total_pops_file = terra::rast(paste0(cbs_path, "host/host.tiff"))
-values(total_pops_file) = 100
-
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = rast(paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff"))[-c(5)]),
-  number_of_observations = 1,
-  prior_number_of_observations = 0,
+  infected_years_file = paste0(cbs_path, "inf_years_file5.tif"),
+  number_of_observations = 39,
+  prior_number_of_observations = 26,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
@@ -47,7 +44,7 @@ PoPS::calibrate(
   temperature_file = "",
   lethal_temperature = -12.87,
   lethal_temperature_month = 1,
-  mortality_frequency = "year",
+  mortality_frequency = "day",
   mortality_frequency_n = 1,
   management = TRUE,
   treatment_dates = c('2014_04_01',
@@ -72,7 +69,7 @@ PoPS::calibrate(
   pesticide_duration = c(30,30,30,30,30,30),
   pesticide_efficacy = 0.829,
   mask = NULL,
-  output_frequency = "year",
+  output_frequency = "day",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
