@@ -5,11 +5,11 @@ start_year <- 2010
 end_year <- 2022
 
 # Outpath
-outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+outpath <- "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
 # Read occurrence and host data
-cbs <- read.csv("/Volumes/cmjone25/Data/Original/pest-occurrence/Citrus_Black_Spot/MasterCBS2022.csv")
-cbs_host <- vect("/Volumes/cmjone25/Data/Original/pest-occurrence/Citrus_Black_Spot/CHRPMultiBlocks.shp")
+cbs <- read.csv("Z:/Data/Original/pest-occurrence/Citrus_Black_Spot/MasterCBS2022.csv")
+cbs_host <- vect("Z:/Data/Original/pest-occurrence/Citrus_Black_Spot/CHRPMultiBlocks.shp")
 
 # Correct out of place long value
 cbs$Long = -1*abs(cbs$Long)
@@ -36,10 +36,10 @@ host_rast <- function(z, cbs_host) {
 }
 
 # Set up input objects
-weather <- rast("/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/precip/prcp_coeff_2016_.tif")
+weather <- rast(paste0(outpath, "/precip/prcp_coeff_2011_.tif"))
 host <- weather[[1]]
 host_cbs <- host_rast(weather, cbs_host)
-writeRaster(host_cbs, paste0(outpath, "host/host.tiff"), overwrite = T)
+writeRaster(host_cbs, paste0(outpath, "host/host.tif"), overwrite = T)
 
 # Yearly infection
 for (year in seq(start_year, end_year)) {

@@ -8,6 +8,10 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
+total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
+total_pops_file = 100*total_pops_file*(1/total_pops_file)
+writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
+
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
 # Calibration for PoPS model
@@ -19,7 +23,7 @@ PoPS::calibrate(
   prior_cov_matrix = matrix(0, 6, 6),
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
-  generation_size = 1000,
+  generation_size = 10,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
   infected_file_list = paste0(cbs_path, "infection/cbs_2010.tif"),
