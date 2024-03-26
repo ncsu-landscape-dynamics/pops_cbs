@@ -10,11 +10,6 @@ library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-total_pops_file = terra::rast(paste0(cbs_path, "host/host.tif"))
-total_pops_file = 100*total_pops_file*(1/total_pops_file)
-writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
-
-
 # Calibration for PoPS model
 PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "inf_years_file1.tif"),
@@ -36,7 +31,7 @@ PoPS::calibrate(
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'week',
+  time_step = 'day',
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2010-01-01",
@@ -49,7 +44,7 @@ PoPS::calibrate(
   temperature_file = "",
   lethal_temperature = -12.87,
   lethal_temperature_month = 1,
-  mortality_frequency = "week",
+  mortality_frequency = "day",
   mortality_frequency_n = 1,
   management = FALSE,
   treatment_dates = c('2010_04_01',
@@ -74,7 +69,7 @@ PoPS::calibrate(
   pesticide_duration = c(30,30,30,30,30,30),
   pesticide_efficacy = 0.829,
   mask = NULL,
-  output_frequency = "week",
+  output_frequency = "day",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
@@ -96,8 +91,8 @@ PoPS::calibrate(
   number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = "None",
-  output_folder_path = paste0(cbs_path, "outputs"),
+  write_outputs = "summary_outputs",
+  output_folder_path = paste0(cbs_path, "outputs/"),
   network_filename = "",
   network_movement = "walk",
   success_metric = "mcc",
@@ -115,4 +110,5 @@ PoPS::calibrate(
   start_with_soil_populations = FALSE,
   county_level_infection_data = FALSE
 )
+
 
