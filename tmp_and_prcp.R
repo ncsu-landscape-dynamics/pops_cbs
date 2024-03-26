@@ -132,3 +132,20 @@ for (year in seq(start_year_2, end_year)) {
 }
 
 
+# Temperature values between 0 and 1
+for (year in seq(2018, end_year)) {
+  if (year < 2018) {
+    temp_file <- rast(paste0(outpath, "temp/","temp_coeff_", year, "_.tif"))
+    temp_file <- temp_file/100
+    writeRaster(temp_file, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
+  }
+  else {
+    temp_file <- rast(paste0(outpath, "temp/","temp_coeff_", year, ".tif"))
+    temp_file <- temp_file/100
+    writeRaster(temp_file, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
+  }
+}
+
+
+
+

@@ -16,7 +16,7 @@ writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite 
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "inf_years_file1.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
   number_of_observations = 32,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
@@ -30,7 +30,7 @@ PoPS::calibrate(
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010_.tif"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010.tif"),
   precip = TRUE,
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
   model_type = "SI",
@@ -73,7 +73,7 @@ PoPS::calibrate(
   pesticide_duration = c(30,30,30,30,30,30),
   pesticide_efficacy = 0.829,
   mask = NULL,
-  output_frequency = "day",
+  output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
