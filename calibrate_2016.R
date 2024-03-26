@@ -14,7 +14,7 @@ cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "inf_years_file7.tif"),
   number_of_observations = 25,
-  prior_number_of_observations = 33,
+  prior_number_of_observations = 255,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
