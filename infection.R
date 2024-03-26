@@ -36,7 +36,7 @@ host_rast <- function(z, cbs_host) {
 }
 
 # Set up input objects
-weather <- rast(paste0(outpath, "/precip/prcp_coeff_2011_.tif"))
+weather <- rast(paste0(outpath, "/precip/prcp_coeff_2016_.tif"))
 host <- weather[[1]]
 host_cbs <- host_rast(weather, cbs_host)
 writeRaster(host_cbs, paste0(outpath, "host/host.tif"), overwrite = T)
