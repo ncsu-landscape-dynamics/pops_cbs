@@ -8,11 +8,11 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+
 total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
-
-cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
 # Calibration for PoPS model
 PoPS::calibrate(
