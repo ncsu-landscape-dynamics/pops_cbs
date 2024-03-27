@@ -16,7 +16,7 @@ total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
 
 # Calibration for PoPS model
-PoPS::calibrate(
+cal_2010 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
   number_of_observations = 32,
   prior_number_of_observations = 0,
@@ -96,7 +96,7 @@ PoPS::calibrate(
   number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = c("summary_outputs"),
+  write_outputs = "summary_outputs",
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
@@ -116,4 +116,8 @@ PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
+file_name <- paste0(cbs_out, "posterior_means_2010.csv")
+write.csv(cal_2010$posterior_means, file_name, row.names = FALSE)
 
+file_name <- paste0(cbs_out, "posterior_cov_matrix_2010.csv")
+write.csv(cal_2010$posterior_cov_matrix, file_name, row.names = FALSE)
