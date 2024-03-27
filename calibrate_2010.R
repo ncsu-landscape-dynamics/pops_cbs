@@ -9,13 +9,14 @@ library(PoPS)
 library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
 
 # Calibration for PoPS model
-cal_2010 <- PoPS::calibrate(
+PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
   number_of_observations = 32,
   prior_number_of_observations = 0,
@@ -95,8 +96,8 @@ cal_2010 <- PoPS::calibrate(
   number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = "summary_outputs",
-  output_folder_path = paste0(cbs_path, "outputs/"),
+  write_outputs = c("summary_outputs"),
+  output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
   success_metric = "mcc",

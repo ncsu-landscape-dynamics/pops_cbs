@@ -9,10 +9,11 @@ library(PoPS)
 library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "inf_years_file4.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_2014.tif"),
   number_of_observations = 26,
   prior_number_of_observations = 157,
   prior_means = c(0, 0, 0, 0, 0, 0),
@@ -46,7 +47,7 @@ PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = FALSE,
+  management = TRUE,
   treatment_dates = c('2013_04_01',
                       '2013_05_01',
                       '2013_06_01',
@@ -69,7 +70,7 @@ PoPS::calibrate(
   pesticide_duration = c(30,30,30,30,30,30),
   pesticide_efficacy = 0.829,
   mask = NULL,
-  output_frequency = "day",
+  output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
@@ -91,8 +92,8 @@ PoPS::calibrate(
   number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = "None",
-  output_folder_path = paste0(cbs_path, "outputs"),
+  write_outputs = c("summary_outputs"),
+  output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
   success_metric = "mcc",

@@ -9,10 +9,11 @@ library(PoPS)
 library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "inf_years_file7.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_2017.tif"),
   number_of_observations = 25,
   prior_number_of_observations = 255,
   prior_means = c(0, 0, 0, 0, 0, 0),
@@ -20,11 +21,11 @@ PoPS::calibrate(
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
   generation_size = 10,
-  pest_host_table = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/pest_host_table_cbs.csv",
-  competency_table = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/competency_table_cbs.csv",
-  infected_file_list = paste0(cbs_path, "infection/cbs_2016.tiff"),
-  host_file_list = paste0(cbs_path, "host/host.tiff"),
-  total_populations_file = total_pops_file,
+  pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
+  competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
+  infected_file_list = paste0(cbs_path, "infection/cbs_2016.tif"),
+  host_file_list = paste0(cbs_path, "host/host.tif"),
+  total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2016_.tif"),
   precip = TRUE,
@@ -69,7 +70,7 @@ PoPS::calibrate(
   pesticide_duration = c(30,30,30,30,30,30),
   pesticide_efficacy = 0.829,
   mask = NULL,
-  output_frequency = "day",
+  output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
@@ -91,8 +92,8 @@ PoPS::calibrate(
   number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = "summary_outputs",
-  output_folder_path = paste0(cbs_path, "outputs/"),
+  write_outputs = c("summary_outputs"),
+  output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
   success_metric = "mcc",
