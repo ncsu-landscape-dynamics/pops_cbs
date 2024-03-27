@@ -8,19 +8,17 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
-total_pops_file = terra::rast(paste0(cbs_path, "host/host.tiff"))
-values(total_pops_file) = 100
 
 pops_multirun(
-  infected_file_list = paste0(paste0(cbs_path, "infection/"), list.files(paste0(cbs_path, "infection/"), pattern = "*.tiff")),
-  host_file_list = paste0(cbs_path, "host/host.tiff"),
-  total_populations_file,
+  infected_file_list = paste0(cbs_path, list.files(paste0(cbs_path, "infection/"), pattern = "*.tif")),
+  host_file_list = paste0(cbs_path, "host/host.tif"),
+  total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   parameter_means,
   parameter_cov_matrix,
-  pest_host_table,
-  competency_table,
+  pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
+  competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010_.tif"),
   precip = TRUE,

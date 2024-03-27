@@ -113,3 +113,8 @@ PoPS::calibrate(
 )
 
 
+file_name <- paste0(cbs_out, "posterior_means_2016.csv")
+write.csv(cal_2016$posterior_means, file_name, row.names = FALSE)
+
+file_name <- paste0(cbs_out, "posterior_cov_matrix_2016.csv")
+write.csv(cal_2016$posterior_cov_matrix, file_name, row.names = FALSE)

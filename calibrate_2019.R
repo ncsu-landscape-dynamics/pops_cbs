@@ -12,7 +12,7 @@ cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # Calibration for PoPS model
-PoPS::calibrate(
+cal_2019 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2020.tif"),
   number_of_observations = 36,
   prior_number_of_observations = 302,
@@ -112,4 +112,8 @@ PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
+file_name <- paste0(cbs_out, "posterior_means_2019.csv")
+write.csv(cal_2019$posterior_means, file_name, row.names = FALSE)
 
+file_name <- paste0(cbs_out, "posterior_cov_matrix_2019.csv")
+write.csv(cal_2019$posterior_cov_matrix, file_name, row.names = FALSE)
