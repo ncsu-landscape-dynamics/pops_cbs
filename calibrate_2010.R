@@ -3,8 +3,8 @@
 # biological invasions with PoPS and a little help from our friends. Frontiers
 # in Ecology and the Environment DOI: 10.1002/fee.2357
 
-install.packages("remotes")
-remotes::install_github("ncsu-landscape-dynamics/rpops")
+# install.packages("remotes")
+# remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
