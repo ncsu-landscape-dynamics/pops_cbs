@@ -3,8 +3,8 @@
 # biological invasions with PoPS and a little help from our friends. Frontiers
 # in Ecology and the Environment DOI: 10.1002/fee.2357
 
-install.packages("remotes")
-remotes::install_github("ncsu-landscape-dynamics/rpops")
+#install.packages("remotes")
+#remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
@@ -15,7 +15,7 @@ total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
 
-# Calibration for PoPS model
+# Calibration for PoPS model 2010
 cal_2010 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
   number_of_observations = 32,
@@ -51,7 +51,7 @@ cal_2010 <- PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = TRUE,
+  management = FALSE,
   treatment_dates = c('2010_04_01',
                       '2010_05_01',
                       '2010_06_01',

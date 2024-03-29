@@ -56,7 +56,7 @@ cal_2020 <- PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = TRUE,
+  management = FALSE,
   treatment_dates = c('2020_04_01',
                       '2020_05_01',
                       '2020_06_01',

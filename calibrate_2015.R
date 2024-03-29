@@ -56,7 +56,7 @@ cal_2015 <- PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = TRUE,
+  management = FALSE,
   treatment_dates = c('2015_04_01',
                       '2015_05_01',
                       '2015_06_01',
