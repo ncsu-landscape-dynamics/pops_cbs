@@ -3,19 +3,19 @@
 # biological invasions with PoPS and a little help from our friends. Frontiers
 # in Ecology and the Environment DOI: 10.1002/fee.2357
 
-# install.packages("remotes")
-# remotes::install_github("ncsu-landscape-dynamics/rpops")
+install.packages("remotes")
+remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-total_pops_file = terra::rast(paste0(cbs_path, "host/host.tif"))
+total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
-terra::writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
+writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
 
-# Calibration for PoPS model 2010
+# Calibration for PoPS model
 cal_2010 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
   number_of_observations = 32,
