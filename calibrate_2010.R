@@ -36,7 +36,7 @@ cal_2010 <- PoPS::calibrate(
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'month',
+  time_step = 'day',
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2010-01-01",
