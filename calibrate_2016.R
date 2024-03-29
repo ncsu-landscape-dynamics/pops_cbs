@@ -36,7 +36,7 @@ PoPS::calibrate(
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2016_.tif"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2016.tif"),
   precip = TRUE,
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2016_.tif"),
   model_type = "SI",
