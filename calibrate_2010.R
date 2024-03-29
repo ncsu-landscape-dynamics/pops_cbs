@@ -36,7 +36,7 @@ cal_2010 <- PoPS::calibrate(
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'day',
+  time_step = 'month',
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2010-01-01",
@@ -51,7 +51,7 @@ cal_2010 <- PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = FALSE,
+  management = TRUE,
   treatment_dates = c('2010_04_01',
                       '2010_05_01',
                       '2010_06_01',
@@ -116,8 +116,8 @@ cal_2010 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "posterior_means.csv")
+file_name <- paste0(cbs_out, "posterior_means_2010.csv")
 write.csv(cal_2010$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "posterior_cov_matrix.csv")
+file_name <- paste0(cbs_out, "posterior_cov_matrix_2010.csv")
 write.csv(cal_2010$posterior_cov_matrix, file_name, row.names = FALSE)

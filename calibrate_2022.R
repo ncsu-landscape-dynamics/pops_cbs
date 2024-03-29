@@ -9,17 +9,27 @@ library(PoPS)
 library(terra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+
+# posterior means from previous calibration
+prior_means <- read.csv(paste0(cbs_out, "posterior_means_2021.csv"))
+prior_means <- prior_means$x
+prior_means <- prior_means[1:6]
+
+# posterior covariance matrix from previous calibration
+prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_2021.csv"))
+prior_cov_matrix <- as.matrix(prior_cov_matrix)
 
 # Calibration for PoPS model
 PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "inf_years_file13.tif"),
   number_of_observations = 18,
   prior_number_of_observations = 478,
-  prior_means = c(0, 0, 0, 0, 0, 0),
-  prior_cov_matrix = matrix(0, 6, 6),
+  prior_means = prior_means,
+  prior_cov_matrix = prior_cov_matrix,
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
-  generation_size = 10,
+  generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
   infected_file_list = paste0(cbs_path, "infection/cbs_2013.tif"),
@@ -111,4 +121,8 @@ PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
+file_name <- paste0(cbs_out, "posterior_means_2022.csv")
+write.csv(cal_2021$posterior_means, file_name, row.names = FALSE)
 
+file_name <- paste0(cbs_out, "posterior_cov_matrix_2022.csv")
+write.csv(cal_2021$posterior_cov_matrix, file_name, row.names = FALSE)

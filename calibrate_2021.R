@@ -11,16 +11,25 @@ library(terra)
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
+# posterior means from previous calibration
+prior_means <- read.csv(paste0(cbs_out, "posterior_means_2020.csv"))
+prior_means <- prior_means$x
+prior_means <- prior_means[1:6]
+
+# posterior covariance matrix from previous calibration
+prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_2020.csv"))
+prior_cov_matrix <- as.matrix(prior_cov_matrix)
+
 # Calibration for PoPS model
 cal_2021 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2022.tif"),
   number_of_observations = 57,
   prior_number_of_observations = 421,
-  prior_means = c(0, 0, 0, 0, 0, 0),
-  prior_cov_matrix = matrix(0, 6, 6),
+  prior_means = prior_means,
+  prior_cov_matrix = prior_cov_matrix,
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
-  generation_size = 10,
+  generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
   infected_file_list = paste0(cbs_path, "infection/cbs_2021.tif"),
@@ -32,7 +41,7 @@ cal_2021 <- PoPS::calibrate(
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2021.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'day',
+  time_step = 'month',
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2021-01-01",

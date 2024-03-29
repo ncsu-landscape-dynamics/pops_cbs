@@ -12,12 +12,12 @@ cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # posterior means from previous calibration
-prior_means <- read.csv(paste0(cbs_out, "posterior_means.csv"))
+prior_means <- read.csv(paste0(cbs_out, "posterior_means_2010.csv"))
 prior_means <- prior_means$x
 prior_means <- prior_means[1:6]
 
 # posterior covariance matrix from previous calibration
-prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix.csv"))
+prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_2010.csv"))
 prior_cov_matrix <- as.matrix(prior_cov_matrix)
 
 # Calibration for PoPS model
@@ -41,7 +41,7 @@ cal_2011 <- PoPS::calibrate(
   precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2011_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'day',
+  time_step = 'month',
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2011-01-01",
@@ -121,8 +121,8 @@ cal_2011 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "posterior_means.csv")
+file_name <- paste0(cbs_out, "posterior_means_2011.csv")
 write.csv(cal_2011$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "posterior_cov_matrix.csv")
+file_name <- paste0(cbs_out, "posterior_cov_matrix_2011.csv")
 write.csv(cal_2011$posterior_cov_matrix, file_name, row.names = FALSE)
