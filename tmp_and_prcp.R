@@ -38,8 +38,8 @@ for (year in seq(start_year, end_year)) {
   if (year < 2018) {
     
     prcp <- rast(paste0("Z:/Data/Original/Daymet/precip/daymet_v3_prcp_", year, "_na.nc4"))
-    tmax <- rast(paste0("Z:/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))
-    tmin <- rast(paste0("Z:/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))
+    tmin <- rast(paste0("Z:/Data/Original/Daymet/tmin/daymet_v3_tmin_", year, "_na.nc4"))
+    tmax <- rast(paste0("Z:/Data/Original/Daymet/tmax/daymet_v3_tmax_", year, "_na.nc4"))
     
     # Project florida onto prcp crs
     florida <- terra::project(florida, prcp)
@@ -49,6 +49,9 @@ for (year in seq(start_year, end_year)) {
     
     # Apply precipitation indicator function to raster
     prcp_values <- prcp_fun(prcp)
+    
+    # Project florida onto prcp crs
+    florida <- terra::project(florida, tmin)
     
     # Crop temp rasters to florida extent
     tmin <- terra::crop(tmin, florida)
@@ -133,17 +136,10 @@ for (year in seq(start_year_2, end_year)) {
 
 
 # Temperature values between 0 and 1
-for (year in seq(2018, end_year)) {
-  if (year < 2018) {
-    temp_file <- rast(paste0(outpath, "temp/","temp_coeff_", year, "_.tif"))
-    temp_file <- temp_file/100
-    writeRaster(temp_file, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
-  }
-  else {
-    temp_file <- rast(paste0(outpath, "temp/","temp_coeff_", year, ".tif"))
-    temp_file <- temp_file/100
-    writeRaster(temp_file, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
-  }
+for (year in seq(start_year, end_year)) {
+  temp_file <- rast(paste0(outpath, "temp/","temp_coeff_", year, ".tif"))
+  temp_file <- abs(temp_file/100)
+  writeRaster(temp_file, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
 }
 
 

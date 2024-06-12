@@ -11,20 +11,18 @@ library(terra)
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-# posterior means from previous calibration
-prior_means <- read.csv(paste0(cbs_out, "posterior_means_2019.csv"))
-prior_means <- prior_means$x
-prior_means <- prior_means[1:6]
+# load calibration outputs
+load(paste0(cbs_out, "calibration_outputs_2019.rdata"))
+prior_means <- cal_2019$posterior_means
+prior_cov_matrix <- cal_2019$posterior_cov_matrix
 
-# posterior covariance matrix from previous calibration
-prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_2019.csv"))
-prior_cov_matrix <- as.matrix(prior_cov_matrix)
+start_time <- Sys.time()
 
 # Calibration for PoPS model
 cal_2020 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2021.tif"),
-  number_of_observations = 83,
-  prior_number_of_observations = 338,
+  number_of_observations = 57,
+  prior_number_of_observations = 387,
   prior_means = prior_means,
   prior_cov_matrix = prior_cov_matrix,
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
@@ -36,16 +34,16 @@ cal_2020 <- PoPS::calibrate(
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2020.tif"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2021.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2020.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2021.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'month',
+  time_step = 'day',
   season_month_start = 4,
   season_month_end = 9,
-  start_date = "2020-01-01",
-  end_date = "2020-12-31",
+  start_date = "2021-01-01",
+  end_date = "2021-12-31",
   use_survival_rates = FALSE,
   survival_rate_month = 3,
   survival_rate_day = 15,
@@ -56,19 +54,9 @@ cal_2020 <- PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = FALSE,
-  treatment_dates = c('2020_04_01',
-                      '2020_05_01',
-                      '2020_06_01',
-                      '2020_07_01',
-                      '2020_08_01',
-                      '2020_09_01'),
-  treatments_file = c(paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif")),
+  management = TRUE,
+  treatment_dates = "2021-04-01",
+  treatments_file = paste0(cbs_path, "trt.tif"),
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
@@ -76,7 +64,7 @@ cal_2020 <- PoPS::calibrate(
   natural_kappa = 0,
   anthropogenic_dir = "NONE",
   anthropogenic_kappa = 0,
-  pesticide_duration = c(30,30,30,30,30,30),
+  pesticide_duration = 180,
   pesticide_efficacy = 0.829,
   mask = NULL,
   output_frequency = "year",
@@ -98,14 +86,14 @@ cal_2020 <- PoPS::calibrate(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+05,
+  number_of_iterations = 1e+06,
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = c("summary_outputs"),
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "mcc",
+  success_metric = "rmse",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -121,8 +109,16 @@ cal_2020 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
+
+end_time <- Sys.time()
+time_taken <- round(end_time - start_time, 2)
+time_taken
+
 file_name <- paste0(cbs_out, "posterior_means_2020.csv")
 write.csv(cal_2020$posterior_means, file_name, row.names = FALSE)
 
 file_name <- paste0(cbs_out, "posterior_cov_matrix_2020.csv")
 write.csv(cal_2020$posterior_cov_matrix, file_name, row.names = FALSE)
+
+file_name <- paste(cbs_out, "calibration_outputs_2020.rdata", sep = "")
+save(cal_2020, file = file_name)

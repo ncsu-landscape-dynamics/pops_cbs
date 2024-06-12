@@ -3,8 +3,8 @@
 # biological invasions with PoPS and a little help from our friends. Frontiers
 # in Ecology and the Environment DOI: 10.1002/fee.2357
 
-#install.packages("remotes")
-#remotes::install_github("ncsu-landscape-dynamics/rpops")
+install.packages("remotes")
+remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
@@ -16,9 +16,10 @@ total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
 
 # Calibration for PoPS model 2010
+# Begin 4/25 at 11:30
 cal_2010 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
-  number_of_observations = 32,
+  number_of_observations = 95,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
@@ -31,16 +32,16 @@ cal_2010 <- PoPS::calibrate(
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2010.tif"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2011.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2010_.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2011_.tif"),
   model_type = "SI",
   latency_period = 0,
-  time_step = 'day',
-  season_month_start = 4,
+  time_step = "day",
+  season_month_start = 3,
   season_month_end = 9,
-  start_date = "2010-01-01",
-  end_date = "2010-12-31",
+  start_date = "2011-01-01",
+  end_date = "2011-12-31",
   use_survival_rates = FALSE,
   survival_rate_month = 3,
   survival_rate_day = 15,
@@ -51,19 +52,9 @@ cal_2010 <- PoPS::calibrate(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = FALSE,
-  treatment_dates = c('2010-04-01',
-                      '2010-05-01',
-                      '2010-06-01',
-                      '2010-07-01',
-                      '2010-08-01',
-                      '2010-09-01'),
-  treatments_file = c(paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif"),
-                      paste0(cbs_path, "host/host.tif")),
+  management = TRUE,
+  treatment_dates = "2011-04-01",
+  treatments_file = paste0(cbs_path, "trt.tif"),
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
@@ -71,7 +62,7 @@ cal_2010 <- PoPS::calibrate(
   natural_kappa = 0,
   anthropogenic_dir = "NONE",
   anthropogenic_kappa = 0,
-  pesticide_duration = c(21,30,21,21,30,21),
+  pesticide_duration = 180,
   pesticide_efficacy = 0.829,
   mask = NULL,
   output_frequency = "year",
@@ -96,11 +87,11 @@ cal_2010 <- PoPS::calibrate(
   number_of_iterations = 1e+06,
   exposed_file_list = "",
   verbose = TRUE,
-  write_outputs = "summary_outputs",
+  write_outputs = "None",
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "mcc",
+  success_metric = "rmse",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -121,3 +112,6 @@ write.csv(cal_2010$posterior_means, file_name, row.names = FALSE)
 
 file_name <- paste0(cbs_out, "posterior_cov_matrix_2010.csv")
 write.csv(cal_2010$posterior_cov_matrix, file_name, row.names = FALSE)
+
+file_name <- paste(cbs_out, "calibration_outputs_2010_3.rdata", sep = "")
+save(cal_2010, file = file_name)
