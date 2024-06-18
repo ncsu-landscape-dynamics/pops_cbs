@@ -8,8 +8,8 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
-cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # calibrated means and covariance matrices
 for (year in seq(2010, 2021)) {
@@ -62,75 +62,75 @@ cal10_11 <- bayesian_mnn_checks(means2010,
                                 cov2010,
                                 means2011,
                                 cov2011,
-                                95/(95+28), 28/(95+28))
+                                97/(97+28), 28/(97+28))
 
 cal11_12 <- bayesian_mnn_checks(cal10_11$posterior_means,
                                 cal10_11$posterior_cov_matrix,
                                 means2012,
                                 cov2012,
-                                123/(123+26), 26)
+                                125/(125+26), 26/(125+26))
 
 cal12_13 <- bayesian_mnn_checks(cal11_12$posterior_means,
                                 cal11_12$posterior_cov_matrix,
                                 means2013,
                                 cov2013,
-                                149, 39)
+                                151/(151+39), 39/(151+39))
 
 cal13_14 <- bayesian_mnn_checks(cal12_13$posterior_means,
                                 cal12_13$posterior_cov_matrix,
                                 means2014,
                                 cov2014,
-                                188, 33)
+                                190/(190+33), 33/(190+33))
 
 cal14_15 <- bayesian_mnn_checks(cal13_14$posterior_means,
                                 cal13_14$posterior_cov_matrix,
                                 means2015,
                                 cov2015,
-                                221, 25)
+                                223/(223+25), 25/(223+25))
 
 cal15_16 <- bayesian_mnn_checks(cal14_15$posterior_means,
                                 cal14_15$posterior_cov_matrix,
                                 means2016,
                                 cov2016,
-                                246, 9)
+                                248/(248+9), 9/(248+9))
 
 cal16_17 <- bayesian_mnn_checks(cal15_16$posterior_means,
                                 cal15_16$posterior_cov_matrix,
                                 means2017,
                                 cov2017,
-                                255, 13)
+                                257/(257+13), 13/(257+13))
 
 cal17_18 <- bayesian_mnn_checks(cal16_17$posterior_means,
                                 cal16_17$posterior_cov_matrix,
                                 means2018,
                                 cov2018,
-                                268, 36)
+                                270/(270+36), 36/(270+36))
 
 cal18_19 <- bayesian_mnn_checks(cal17_18$posterior_means,
                                 cal17_18$posterior_cov_matrix,
                                 means2019,
                                 cov2019,
-                                304, 83)
+                                306/(306+83), 83/(306+83))
 
 cal19_20 <- bayesian_mnn_checks(cal18_19$posterior_means,
                                 cal18_19$posterior_cov_matrix,
                                 means2020,
                                 cov2020,
-                                387, 57)
+                                389/(389+57), 57/(389+57))
 
 cal20_21 <- bayesian_mnn_checks(cal19_20$posterior_means,
                                 cal19_20$posterior_cov_matrix,
                                 means2021,
                                 cov2021,
-                                444, 18)
+                                446/(446+18), 18/(446+18))
 
-parameter_means = cal10_11$posterior_means
-parameter_cov_matrix = cal10_11$posterior_cov_matrix
+parameter_means = cal19_20$posterior_means
+parameter_cov_matrix = cal19_20$posterior_cov_matrix
 
 start_time <- Sys.time()
 
-run_2011 <- pops_multirun(
-  infected_file_list = paste0(cbs_path, "infection/cbs_2011.tif"),
+run_2012 <- pops_multirun(
+  infected_file_list = paste0(cbs_path, "infection/cbs_2021.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   parameter_means,
@@ -138,16 +138,16 @@ run_2011 <- pops_multirun(
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
   temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2012.tif"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2022.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2012_.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2022.tif"),
   model_type = "SI",
   latency_period = 0,
   time_step = "day",
   season_month_start = 4,
   season_month_end = 9,
-  start_date = "2012-01-01",
-  end_date = "2012-12-31",
+  start_date = "2022-01-01",
+  end_date = "2022-12-31",
   use_survival_rates = FALSE,
   survival_rate_month = 3,
   survival_rate_day = 15,
@@ -159,14 +159,14 @@ run_2011 <- pops_multirun(
   mortality_frequency = "day",
   mortality_frequency_n = 1,
   management = TRUE,
-  treatment_dates = "2012-04-01",
+  treatment_dates = "2022-04-01",
   treatments_file = paste0(cbs_path, "trt.tif"),
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
   natural_dir = "NONE",
   anthropogenic_dir = "NONE",
-  number_of_iterations = 10,
+  number_of_iterations = 100,
   number_of_cores = 7,
   pesticide_duration = 180,
   pesticide_efficacy = 0.829,
