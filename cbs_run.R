@@ -58,79 +58,79 @@ bayesian_mnn_checks <- function(prior_means,
 }
 
 # Combined parameter calibration
-cal10_11 <- bayesian_mnn_checks(means2010,
+cal11_12 <- bayesian_mnn_checks(means2010,
                                 cov2010,
                                 means2011,
                                 cov2011,
                                 97/(97+28), 28/(97+28))
 
-cal11_12 <- bayesian_mnn_checks(cal10_11$posterior_means,
-                                cal10_11$posterior_cov_matrix,
+cal11_13 <- bayesian_mnn_checks(cal11_12$posterior_means,
+                                cal11_12$posterior_cov_matrix,
                                 means2012,
                                 cov2012,
                                 125/(125+26), 26/(125+26))
 
-cal12_13 <- bayesian_mnn_checks(cal11_12$posterior_means,
-                                cal11_12$posterior_cov_matrix,
+cal11_14 <- bayesian_mnn_checks(cal11_13$posterior_means,
+                                cal11_13$posterior_cov_matrix,
                                 means2013,
                                 cov2013,
                                 151/(151+39), 39/(151+39))
 
-cal13_14 <- bayesian_mnn_checks(cal12_13$posterior_means,
-                                cal12_13$posterior_cov_matrix,
+cal11_15 <- bayesian_mnn_checks(cal11_14$posterior_means,
+                                cal11_14$posterior_cov_matrix,
                                 means2014,
                                 cov2014,
                                 190/(190+33), 33/(190+33))
 
-cal14_15 <- bayesian_mnn_checks(cal13_14$posterior_means,
-                                cal13_14$posterior_cov_matrix,
+cal11_16 <- bayesian_mnn_checks(cal11_15$posterior_means,
+                                cal11_15$posterior_cov_matrix,
                                 means2015,
                                 cov2015,
                                 223/(223+25), 25/(223+25))
 
-cal15_16 <- bayesian_mnn_checks(cal14_15$posterior_means,
-                                cal14_15$posterior_cov_matrix,
+cal11_17 <- bayesian_mnn_checks(cal11_16$posterior_means,
+                                cal11_16$posterior_cov_matrix,
                                 means2016,
                                 cov2016,
                                 248/(248+9), 9/(248+9))
 
-cal16_17 <- bayesian_mnn_checks(cal15_16$posterior_means,
-                                cal15_16$posterior_cov_matrix,
+cal11_18 <- bayesian_mnn_checks(cal11_17$posterior_means,
+                                cal11_17$posterior_cov_matrix,
                                 means2017,
                                 cov2017,
                                 257/(257+13), 13/(257+13))
 
-cal17_18 <- bayesian_mnn_checks(cal16_17$posterior_means,
-                                cal16_17$posterior_cov_matrix,
+cal11_19 <- bayesian_mnn_checks(cal11_18$posterior_means,
+                                cal11_18$posterior_cov_matrix,
                                 means2018,
                                 cov2018,
                                 270/(270+36), 36/(270+36))
 
-cal18_19 <- bayesian_mnn_checks(cal17_18$posterior_means,
-                                cal17_18$posterior_cov_matrix,
+cal11_20 <- bayesian_mnn_checks(cal11_19$posterior_means,
+                                cal11_19$posterior_cov_matrix,
                                 means2019,
                                 cov2019,
                                 306/(306+83), 83/(306+83))
 
-cal19_20 <- bayesian_mnn_checks(cal18_19$posterior_means,
-                                cal18_19$posterior_cov_matrix,
+cal11_21 <- bayesian_mnn_checks(cal11_20$posterior_means,
+                                cal11_20$posterior_cov_matrix,
                                 means2020,
                                 cov2020,
                                 389/(389+57), 57/(389+57))
 
-cal20_21 <- bayesian_mnn_checks(cal19_20$posterior_means,
-                                cal19_20$posterior_cov_matrix,
+cal11_22 <- bayesian_mnn_checks(cal11_21$posterior_means,
+                                cal11_21$posterior_cov_matrix,
                                 means2021,
                                 cov2021,
                                 446/(446+18), 18/(446+18))
 
-parameter_means = cal19_20$posterior_means
-parameter_cov_matrix = cal19_20$posterior_cov_matrix
+parameter_means = cal11_21$posterior_means
+parameter_cov_matrix = cal11_21$posterior_cov_matrix
 
 start_time <- Sys.time()
 
 run_2012 <- pops_multirun(
-  infected_file_list = paste0(cbs_path, "infection/cbs_2021.tif"),
+  infected_file_list = paste0(cbs_path, "infection/inf_after_sep_2021.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   parameter_means,
@@ -214,5 +214,3 @@ end_time <- Sys.time()
 time_taken <- round(end_time-start_time, 2)
 time_taken
 
-file_name <- paste(cbs_out, "multirun_outputs.rdata", sep = "")
-save(run_2011, file = file_name)
