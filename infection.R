@@ -99,5 +99,10 @@ for (season in 1:13) {
   infections_season <- terra::rasterize(sp1, host, field = "positive", fun = sum)
   writeRaster(infections_year, paste0(outpath, "infection/cbs_", season, ".tiff"),
               overwrite = T)
+  
+  # Infections after treatment is applied
+  inf_after_trt <- round(infections_season*0.171)
+  inf_after_trt <- terra::ifel(inf_after_trt == 0, NA, inf_after_trt)
+  writeRaster(inf_after_trt, paste0(outpath, "infection/season/inf_after_", season, ".tif"), overwrite = T)
 }
 

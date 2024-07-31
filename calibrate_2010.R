@@ -8,8 +8,8 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
-cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
@@ -19,7 +19,7 @@ writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite 
 # Begin 4/25 at 11:30
 cal_2010 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
-  number_of_observations = 95,
+  number_of_observations = 97,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
   prior_cov_matrix = matrix(0, 6, 6),
@@ -38,7 +38,7 @@ cal_2010 <- PoPS::calibrate(
   model_type = "SI",
   latency_period = 0,
   time_step = "day",
-  season_month_start = 3,
+  season_month_start = 5,
   season_month_end = 9,
   start_date = "2011-01-01",
   end_date = "2011-12-31",
@@ -91,7 +91,7 @@ cal_2010 <- PoPS::calibrate(
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse",
+  success_metric = "quantity and configuration",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",

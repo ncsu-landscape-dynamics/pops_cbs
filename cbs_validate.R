@@ -13,10 +13,10 @@ cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/
 
 # calibrated means and covariance matrices
 for (year in seq(2010, 2021)) {
- cal_means <- read.csv(paste0(cbs_out, "posterior_means_", year, ".csv"))
- cal_cov <- read.csv(paste0(cbs_out, "posterior_cov_matrix_", year, ".csv"))
- assign(paste0("means", year), cal_means[[1]])
- assign(paste0("cov", year), cal_cov)
+  cal_means <- read.csv(paste0(cbs_out, "posterior_means_", year, ".csv"))
+  cal_cov <- read.csv(paste0(cbs_out, "posterior_cov_matrix_", year, ".csv"))
+  assign(paste0("means", year), cal_means[[1]])
+  assign(paste0("cov", year), cal_cov)
 }
 
 bayesian_mnn_checks <- function(prior_means,
@@ -129,14 +129,18 @@ parameter_cov_matrix = cal11_13$posterior_cov_matrix
 
 start_time <- Sys.time()
 
-run_cbs <- pops_multirun(
-  infected_file_list = paste0(cbs_path, "infection/inf_after_sep_2013.tif"),
-  host_file_list = paste0(cbs_path, "host/host.tif"),
-  total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
+# Validate for each year after 2011.
+val_cbs <- validate(
+  infected_years_file = paste0(cbs_path, "infection/cbs_2014.tif"),
+  number_of_iterations = 100,
+  number_of_cores = 7,
   parameter_means,
   parameter_cov_matrix,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
+  infected_file_list = paste0(cbs_path, "infection/inf_after_sep_2013.tif"),
+  host_file_list = paste0(cbs_path, "host/host.tif"),
+  total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2014.tif"),
   precip = TRUE,
@@ -166,11 +170,9 @@ run_cbs <- pops_multirun(
   anthropogenic_kernel_type = "cauchy",
   natural_dir = "NONE",
   anthropogenic_dir = "NONE",
-  number_of_iterations = 100,
-  number_of_cores = 7,
   pesticide_duration = 180,
   pesticide_efficacy = 0.829,
-  random_seed = NULL,
+  mask = NULL,
   output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
@@ -190,11 +192,13 @@ run_cbs <- pops_multirun(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   exposed_file_list = "",
-  mask = NULL,
   write_outputs = "None",
   output_folder_path = cbs_out,
+  point_file = "",
   network_filename = "",
   network_movement = "walk",
+  use_distance = FALSE,
+  use_configuration = TRUE,
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -213,5 +217,4 @@ run_cbs <- pops_multirun(
 end_time <- Sys.time()
 time_taken <- round(end_time-start_time, 2)
 time_taken
-
 
