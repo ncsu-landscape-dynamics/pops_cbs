@@ -22,7 +22,7 @@ start_time <- Sys.time()
 cal_2013 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2014.tif"),
   number_of_observations = 39,
-  prior_number_of_observations = 149,
+  prior_number_of_observations = 151,
   prior_means,
   prior_cov_matrix,
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),

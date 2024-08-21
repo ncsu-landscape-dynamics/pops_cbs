@@ -28,8 +28,13 @@ cal_2011 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2012.tif"),
   number_of_observations = 28,
   prior_number_of_observations = 97,
+<<<<<<< HEAD
   prior_means = prior_means,
   prior_cov_matrix = prior_cov_matrix,
+=======
+  prior_means,
+  prior_cov_matrix,
+>>>>>>> 5bfe1d20a272536d1114a6f5dc0f72e4b2d27a7b
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
   generation_size = 1000,

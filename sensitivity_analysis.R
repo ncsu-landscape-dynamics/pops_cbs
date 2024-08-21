@@ -1,22 +1,18 @@
-# Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., Skrip, M.,
-# Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021. Iteratively forecasting
-# biological invasions with PoPS and a little help from our friends. Frontiers
-# in Ecology and the Environment DOI: 10.1002/fee.2357
-
+# Install packages
 install.packages("remotes")
 remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
-cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # calibrated means and covariance matrices
 for (year in seq(2010, 2021)) {
- cal_means <- read.csv(paste0(cbs_out, "posterior_means_", year, ".csv"))
- cal_cov <- read.csv(paste0(cbs_out, "posterior_cov_matrix_", year, ".csv"))
- assign(paste0("means", year), cal_means[[1]])
- assign(paste0("cov", year), cal_cov)
+  cal_means <- read.csv(paste0(cbs_out, "posterior_means_", year, ".csv"))
+  cal_cov <- read.csv(paste0(cbs_out, "posterior_cov_matrix_", year, ".csv"))
+  assign(paste0("means", year), cal_means[[1]])
+  assign(paste0("cov", year), cal_cov)
 }
 
 bayesian_mnn_checks <- function(prior_means,
@@ -124,94 +120,111 @@ cal11_22 <- bayesian_mnn_checks(cal11_21$posterior_means,
                                 cov2021,
                                 446/(446+18), 18/(446+18))
 
-parameter_means = cal11_15$posterior_means
-parameter_cov_matrix = cal11_15$posterior_cov_matrix
+parameter_means = cal11_13$posterior_means
+parameter_cov_matrix = cal11_13$posterior_cov_matrix
+
+pesticide_durations = c(140, 150, 160, 180, 200, 220)
+pesticide_efficacies = c(0.5, 0.6, 0.7, 0.8, 0.9, 1)
+sensitivity_means = matrix( NA, 6, 6)
+sensitivity_sd = matrix( NA, 6, 6)
+
 
 start_time <- Sys.time()
 
-run_cbs <- pops_multirun(
-  infected_file_list = paste0(cbs_path, "infection/season/cbs_6.tif"),
-  host_file_list = paste0(cbs_path, "host/host.tif"),
-  total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
-  parameter_means,
-  parameter_cov_matrix,
-  pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
-  competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
-  temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_season7.tif"),
-  precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_season7.tif"),
-  model_type = "SI",
-  latency_period = 0,
-  time_step = "day",
-  season_month_start = 4,
-  season_month_end = 8,
-  start_date = "2015-09-01",
-  end_date = "2016-08-31",
-  use_survival_rates = FALSE,
-  survival_rate_month = 3,
-  survival_rate_day = 15,
-  survival_rates_file = "",
-  use_lethal_temperature = FALSE,
-  temperature_file = "",
-  lethal_temperature = -12.87,
-  lethal_temperature_month = 1,
-  mortality_frequency = "day",
-  mortality_frequency_n = 1,
-  management = TRUE,
-  treatment_dates = "2016-04-01",
-  treatments_file = paste0(cbs_path, "trt.tif"),
-  treatment_method = "ratio",
-  natural_kernel_type = "cauchy",
-  anthropogenic_kernel_type = "cauchy",
-  natural_dir = "NONE",
-  anthropogenic_dir = "NONE",
-  number_of_iterations = 100,
-  number_of_cores = 7,
-  pesticide_duration = 152,
-  pesticide_efficacy = 0.829,
-  random_seed = NULL,
-  output_frequency = "year",
-  output_frequency_n = 1,
-  movements_file = "",
-  use_movements = FALSE,
-  start_exposed = FALSE,
-  generate_stochasticity = TRUE,
-  establishment_stochasticity = TRUE,
-  movement_stochasticity = TRUE,
-  dispersal_stochasticity = TRUE,
-  establishment_probability = 0.5,
-  dispersal_percentage = 0.99,
-  quarantine_areas_file = "",
-  use_quarantine = FALSE,
-  use_spreadrates = FALSE,
-  use_overpopulation_movements = FALSE,
-  overpopulation_percentage = 0,
-  leaving_percentage = 0,
-  leaving_scale_coefficient = 1,
-  exposed_file_list = "",
-  mask = NULL,
-  write_outputs = "None",
-  output_folder_path = cbs_out,
-  network_filename = "",
-  network_movement = "walk",
-  use_initial_condition_uncertainty = FALSE,
-  use_host_uncertainty = FALSE,
-  weather_type = "deterministic",
-  temperature_coefficient_sd_file = "",
-  precipitation_coefficient_sd_file = "",
-  dispersers_to_soils_percentage = 0,
-  quarantine_directions = "",
-  multiple_random_seeds = FALSE,
-  file_random_seeds = NULL,
-  use_soils = FALSE,
-  soil_starting_pest_file = "",
-  start_with_soil_populations = FALSE,
-  county_level_infection_data = FALSE
-)
+for (i in 1:length(pesticide_durations)) {
+  for (j in 1:length(pesticide_efficacies)) {
+
+  run_cbs <- pops_multirun(
+    infected_file_list = paste0(cbs_path, "infection/inf_after_sep_2013.tif"),
+    host_file_list = paste0(cbs_path, "host/host.tif"),
+    total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
+    parameter_means,
+    parameter_cov_matrix,
+    pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
+    competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
+    temp = TRUE,
+    temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2014.tif"),
+    precip = TRUE,
+    precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2014.tif"),
+    model_type = "SI",
+    latency_period = 0,
+    time_step = "day",
+    season_month_start = 4,
+    season_month_end = 9,
+    start_date = "2014-01-01",
+    end_date = "2014-12-31",
+    use_survival_rates = FALSE,
+    survival_rate_month = 3,
+    survival_rate_day = 15,
+    survival_rates_file = "",
+    use_lethal_temperature = FALSE,
+    temperature_file = "",
+    lethal_temperature = -12.87,
+    lethal_temperature_month = 1,
+    mortality_frequency = "day",
+    mortality_frequency_n = 1,
+    management = TRUE,
+    treatment_dates = "2014-04-01",
+    treatments_file = paste0(cbs_path, "trt.tif"),
+    treatment_method = "ratio",
+    natural_kernel_type = "cauchy",
+    anthropogenic_kernel_type = "cauchy",
+    natural_dir = "NONE",
+    anthropogenic_dir = "NONE",
+    number_of_iterations = 100,
+    number_of_cores = 7,
+    pesticide_duration = pesticide_durations[i],
+    pesticide_efficacy = pesticide_efficacies[j],
+    random_seed = NULL,
+    output_frequency = "year",
+    output_frequency_n = 1,
+    movements_file = "",
+    use_movements = FALSE,
+    start_exposed = FALSE,
+    generate_stochasticity = TRUE,
+    establishment_stochasticity = TRUE,
+    movement_stochasticity = TRUE,
+    dispersal_stochasticity = TRUE,
+    establishment_probability = 0.5,
+    dispersal_percentage = 0.99,
+    quarantine_areas_file = "",
+    use_quarantine = FALSE,
+    use_spreadrates = FALSE,
+    use_overpopulation_movements = FALSE,
+    overpopulation_percentage = 0,
+    leaving_percentage = 0,
+    leaving_scale_coefficient = 1,
+    exposed_file_list = "",
+    mask = NULL,
+    write_outputs = "None",
+    output_folder_path = cbs_out,
+    network_filename = "",
+    network_movement = "walk",
+    use_initial_condition_uncertainty = FALSE,
+    use_host_uncertainty = FALSE,
+    weather_type = "deterministic",
+    temperature_coefficient_sd_file = "",
+    precipitation_coefficient_sd_file = "",
+    dispersers_to_soils_percentage = 0,
+    quarantine_directions = "",
+    multiple_random_seeds = FALSE,
+    file_random_seeds = NULL,
+    use_soils = FALSE,
+    soil_starting_pest_file = "",
+    start_with_soil_populations = FALSE,
+    county_level_infection_data = FALSE
+  )
+
+  sensitivity_means[i,j] <- run_cbs$number_infecteds[1]
+  sensitivity_sd[i,j] <- run_cbs$number_infecteds[2]
+
+  }
+}
 
 end_time <- Sys.time()
 time_taken <- round(end_time-start_time, 2)
 time_taken
 
+save(sensitivity_means, file = paste0(cbs_out, "sensitivity_means.csv"))
+save(sensitivity_sd, file = paste0(cbs_out, "sensitivity_sd.csv"))
 
