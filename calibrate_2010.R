@@ -8,12 +8,14 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
-cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
 total_pops_file = 100*total_pops_file*(1/total_pops_file)
 writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
+
+start_time <- Sys.time()
 
 # Calibration for PoPS model 2010
 # Begin 4/25 at 11:30
@@ -34,11 +36,11 @@ cal_2010 <- PoPS::calibrate(
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2011.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2011_.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2011.tif"),
   model_type = "SI",
   latency_period = 0,
   time_step = "day",
-  season_month_start = 5,
+  season_month_start = 4,
   season_month_end = 9,
   start_date = "2011-01-01",
   end_date = "2011-12-31",
@@ -84,14 +86,14 @@ cal_2010 <- PoPS::calibrate(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+06,
+  number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "quantity and configuration",
+  success_metric = "configuration",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -107,11 +109,15 @@ cal_2010 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "posterior_means_2010.csv")
+file_name <- paste0(cbs_out, "qc_means_2010.csv")
 write.csv(cal_2010$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "posterior_cov_matrix_2010.csv")
+file_name <- paste0(cbs_out, "qc_cov_matrix_2010.csv")
 write.csv(cal_2010$posterior_cov_matrix, file_name, row.names = FALSE)
+
+end_time <- Sys.time()
+time_taken <- round(end_time-start_time, 2)
+time_taken
 
 file_name <- paste(cbs_out, "calibration_outputs_2010_3.rdata", sep = "")
 save(cal_2010, file = file_name)

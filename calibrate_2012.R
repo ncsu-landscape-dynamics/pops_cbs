@@ -16,13 +16,17 @@ load(paste0(cbs_out, "calibration_outputs_2011.rdata"))
 prior_means <- cal_2011$posterior_means
 prior_cov_matrix <- cal_2011$posterior_cov_matrix
 
+prior_means <- read.csv(paste0(cbs_out, "rd_means_2011.csv"))
+prior_means <- prior_means[[1]]
+prior_cov_matrix <- read.csv(paste0(cbs_out, "rd_cov_matrix_2011.csv"))
+
 start_time <- Sys.time()
 
 # Calibration for PoPS model
 cal_2012 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2013.tif"),
   number_of_observations = 26,
-  prior_number_of_observations = 123,
+  prior_number_of_observations = 125,
   prior_means,
   prior_cov_matrix,
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
@@ -36,11 +40,11 @@ cal_2012 <- PoPS::calibrate(
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2013.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2013_.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2013.tif"),
   model_type = "SI",
   latency_period = 0,
   time_step = "day",
-  season_month_start = 4,
+  season_month_start = 5,
   season_month_end = 9,
   start_date = "2013-01-01",
   end_date = "2013-12-31",
@@ -93,7 +97,7 @@ cal_2012 <- PoPS::calibrate(
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse",
+  success_metric = "rmse and distance",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -109,15 +113,15 @@ cal_2012 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
+file_name <- paste0(cbs_out, "rd_means_2012.csv")
+write.csv(cal_2012$posterior_means, file_name, row.names = FALSE)
+
+file_name <- paste0(cbs_out, "rd_cov_matrix_2012.csv")
+write.csv(cal_2012$posterior_cov_matrix, file_name, row.names = FALSE)
+
 end_time <- Sys.time()
 time_taken <- round(end_time - start_time, 2)
 time_taken
-
-file_name <- paste0(cbs_out, "posterior_means_2012.csv")
-write.csv(cal_2012$posterior_means, file_name, row.names = FALSE)
-
-file_name <- paste0(cbs_out, "posterior_cov_matrix_2012.csv")
-write.csv(cal_2012$posterior_cov_matrix, file_name, row.names = FALSE)
 
 file_name <- paste(cbs_out, "calibration_outputs_2012.rdata", sep = "")
 save(cal_2012, file = file_name)
