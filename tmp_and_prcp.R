@@ -144,6 +144,7 @@ for (year in seq(2010, 2022)) {
   assign(paste0("temp", year), temp)
   assign(paste0("precip", year), precip)
 }
+# Average temperature files
 crs(temp2010)<-crs(temp2011)<-crs(temp2012)<-crs(temp2013)<-crs(temp2014)<-crs(temp2015)<-crs(temp2016)<-crs(temp2017)<-crs(temp2018)<-crs(temp2019)<-crs(temp2020)<-crs(temp2021)<-crs(temp2022)
 names(temp2010)<-names(temp2011)<-names(temp2012)<-names(temp2013)<-names(temp2014)<-names(temp2015)<-names(temp2016)<-names(temp2017)<-names(temp2018)<-names(temp2019)<-names(temp2020)<-names(temp2021)<-names(temp2022)
 temp_mean <- mosaic(temp2010, temp2011, temp2012, temp2013, temp2014, temp2015, temp2016, 
@@ -154,4 +155,18 @@ names(temp_mean) <- paste0("tmean_", seq(1,365))
 names(temp_sd) <- paste0("tstdev_", seq(1,365))
 writeRaster(temp_mean, paste0(cbs_path, "temp/average_temp.tif"), overwrite=F)
 writeRaster(temp_sd, paste0(cbs_path, "temp/sd_temp.tif"), overwrite=F)
+
+# Average precip files
+crs(precip2010)<-crs(precip2011)<-crs(precip2012)<-crs(precip2013)<-crs(precip2014)<-crs(precip2015)<-crs(precip2016)<-crs(precip2017)<-crs(precip2018)<-crs(precip2019)<-crs(precip2020)<-crs(precip2021)<-crs(precip2022)
+names(precip2010)<-names(precip2011)<-names(precip2012)<-names(precip2013)<-names(precip2014)<-names(precip2015)<-names(precip2016)<-names(precip2017)<-names(precip2018)<-names(precip2019)<-names(precip2020)<-names(precip2021)<-names(precip2022)
+precip_mean <- mosaic(precip2010, precip2011, precip2012, precip2013, precip2014, precip2015, precip2016, 
+                    precip2017, precip2018, precip2019, precip2020, precip2021, precip2022, fun="mean")
+precip_sd <- stdev(precip2010, precip2011, precip2012, precip2013, precip2014, precip2015, precip2016, 
+                 precip2017, precip2018, precip2019, precip2020, precip2021, precip2022)
+names(precip_mean) <- paste0("pmean_", seq(1,365))
+names(precip_sd) <- paste0("pstdev_", seq(1,365))
+time(precip_mean) <- NULL
+time(precip_sd) <- NULL
+writeRaster(precip_mean, paste0(cbs_path, "precip/average_precip.tif"), overwrite=F)
+writeRaster(precip_sd, paste0(cbs_path, "precip/sd_precip.tif"), overwrite=F)
 
