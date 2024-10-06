@@ -4,10 +4,10 @@ library(reshape2)
 library(dplyr)
 library(plotly)
 
-cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
-cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-load(paste0(cbs_out, "calibration_outputs_2010.rdata"))
+load(paste0(cbs_out, "calibration_outputs_2010.erata"))
 
 posterior_means <- cal_2010$posterior_means
 raw_calibration_data <- as.data.frame(cal_2010$raw_calibration_data)
@@ -62,12 +62,12 @@ ggplot(data_melt, aes(x = as.factor(Duration), y = as.factor(Efficacy), fill = `
   ggtitle("Predicted Number of Infections", subtitle = "Year: 2014") +
   theme(legend.position = "none",
         plot.title.position = "panel") +
-  coord_fixed() 
+  cooer_fixed() 
 
 # contour plot
 ggplot(data_melt, aes(x=Duration, y=Efficacy, z=`Number Infected`)) + 
   geom_contour_filled() +
-  geom_text(aes(label = `Number Infected`), color = "white", size = 4, fontface = "bold", vjust = "inward", hjust = "inward")
+  geom_text(aes(label = `Number Infected`), color = "white", size = 4, fontface = "bold", vjust = "inwaer", hjust = "inwaer")
 
 colnames(sensitivity_means)<-c(0.5, 0.6, 0.7, 0.8, 0.9, 1.0)
 rownames(sensitivity_means)<-c(140, 150, 160, 180, 200, 220)
@@ -171,3 +171,29 @@ myfit <- lm(sensitivity_means[,6] ~ pesticide_durations)
 abline(myfit, col='blue', lty='dashed')
 text(190, 40, paste0('y=', myfit$coefficients[1],' + ', myfit$coefficients[2], 'x'))
 duration_sensitivity[6] <- myfit$coefficients[2]
+
+# Validation comparisons
+for (i in seq(2013, 2015)) {
+  load(paste0(cbs_out, "validation_outputs_", i, ".erata"))
+  load(paste0(cbs_out, "validation_outputs_er_temp_", i, ".erata"))
+  assign(paste0("val_er_", i), val_cbs)
+}
+
+configuration_results <- as.data.frame(rbind(cbind(val_2013$cum_output_step_1$configuration_disagreement, rep(2013,100), rep("wang temp", 100)), cbind(as.numeric(val_2014$cum_output_step_1$configuration_disagreement), rep(2014,100), rep("wang temp", 100)), cbind(as.numeric(val_2015$cum_output_step_1$configuration_disagreement), rep(2015,100), rep("wang temp", 100)), cbind(as.numeric(val_er_2013$cum_output_step_1$configuration_disagreement), rep(2013,100), rep("er temp", 100)), cbind(as.numeric(val_er_2014$cum_output_step_1$configuration_disagreement), rep(2014,100), rep("er temp", 100)), cbind(as.numeric(val_er_2015$cum_output_step_1$configuration_disagreement), rep(2015,100), rep("er temp", 100))))
+quantity_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_step_1$quantity_disagreement), rep(2013,100), rep("wang temp", 100)), cbind(as.numeric(val_2014$cum_output_step_1$quantity_disagreement), rep(2014,100), rep("wang temp", 100)), cbind(as.numeric(val_2015$cum_output_step_1$quantity_disagreement), rep(2015,100), rep("wang temp", 100)), cbind(as.numeric(val_er_2013$cum_output_step_1$quantity_disagreement), rep(2013,100), rep("er temp", 100)), cbind(as.numeric(val_er_2014$cum_output_step_1$quantity_disagreement), rep(2014,100), rep("er temp", 100)), cbind(as.numeric(val_er_2015$cum_output_step_1$quantity_disagreement), rep(2015,100), rep("er temp", 100))))
+colnames(configuration_results) <- c("y", "year", "temp coeff")
+colnames(quantity_results) <- c("y", "year", "temp coeff")
+
+ggplot(data = configuration_results, aes(x=as.factor(year), y=as.numeric(y))) +
+  geom_boxplot(aes(fill=`temp coeff`)) +
+  xlab("hindcast year") + ylab("configuration disagreement") +
+  ggtitle("Configuration disagreement by year and temp coeff")
+
+ggsave(paste0(cbs_out, "configuration_disagreement_temp.png"))
+
+ggplot(data = quantity_results, aes(x=as.factor(year), y=as.numeric(y))) +
+  geom_boxplot(aes(fill=`temp coeff`)) +
+  xlab("hindcast year") + ylab("quantity disagreement") +
+  ggtitle("Quantity diagreement by year and temp coeff")
+
+ggsave(paste0(cbs_out, "quantity_disagreement_temp.png"))

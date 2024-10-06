@@ -16,6 +16,10 @@ load(paste0(cbs_out, "calibration_outputs_2012.rdata"))
 prior_means <- cal_2012$posterior_means
 prior_cov_matrix <- cal_2012$posterior_cov_matrix
 
+prior_means <- read.csv(paste0(cbs_out, "er_temp_means_2012.csv"))
+prior_means <- prior_means[[1]]
+prior_cov_matrix <- read.csv(paste0(cbs_out, "er_temp_cov_matrix_2012.csv"))
+
 start_time <- Sys.time()
 
 # Calibration for PoPS model
@@ -36,7 +40,7 @@ cal_2013 <- PoPS::calibrate(
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2014.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2014_.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2014.tif"),
   model_type = "SI",
   latency_period = 0,
   time_step = "day",
@@ -93,7 +97,7 @@ cal_2013 <- PoPS::calibrate(
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse",
+  success_metric = "rmse and distance",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -109,15 +113,15 @@ cal_2013 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
+file_name <- paste0(cbs_out, "er_temp_means_2013.csv")
+write.csv(cal_2013$posterior_means, file_name, row.names = FALSE)
+
+file_name <- paste0(cbs_out, "er_temp_cov_matrix_2013.csv")
+write.csv(cal_2013$posterior_cov_matrix, file_name, row.names = FALSE)
+
 end_time <- Sys.time()
 time_taken <- round(end_time - start_time, 2)
 time_taken
-
-file_name <- paste0(cbs_out, "posterior_means_2013.csv")
-write.csv(cal_2013$posterior_means, file_name, row.names = FALSE)
-
-file_name <- paste0(cbs_out, "posterior_cov_matrix_2013.csv")
-write.csv(cal_2013$posterior_cov_matrix, file_name, row.names = FALSE)
 
 file_name <- paste(cbs_out, "calibration_outputs_2013.rdata", sep = "")
 save(cal_2013, file = file_name)

@@ -8,11 +8,11 @@ remotes::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
 library(terra)
 
-cbs_path = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
-cbs_out = "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
 # calibrated means and covariance matrices
-for (year in seq(2010, 2021)) {
+for (year in seq(2010, 2022)) {
   cal_means <- read.csv(paste0(cbs_out, "posterior_means_", year, ".csv"))
   cal_cov <- read.csv(paste0(cbs_out, "posterior_cov_matrix_", year, ".csv"))
   assign(paste0("means", year), cal_means[[1]])
@@ -124,34 +124,34 @@ cal11_22 <- bayesian_mnn_checks(cal11_21$posterior_means,
                                 cov2021,
                                 446/(446+18), 18/(446+18))
 
-parameter_means = cal11_13$posterior_means
-parameter_cov_matrix = cal11_13$posterior_cov_matrix
+parameter_means = cal11_14$posterior_means
+parameter_cov_matrix = cal11_14$posterior_cov_matrix
 
 start_time <- Sys.time()
 
 # Validate for each year after 2011.
 val_cbs <- validate(
-  infected_years_file = paste0(cbs_path, "infection/cbs_2014.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_2012.tif"),
   number_of_iterations = 100,
   number_of_cores = 7,
-  parameter_means,
-  parameter_cov_matrix,
+  parameter_means = prior_means,
+  parameter_cov_matrix = prior_cov_matrix,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
-  infected_file_list = paste0(cbs_path, "infection/inf_after_sep_2013.tif"),
+  infected_file_list = paste0(cbs_path, "infection/cbs_2011.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
-  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2014.tif"),
+  temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2012.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2014.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2012.tif"),
   model_type = "SI",
   latency_period = 0,
   time_step = "day",
   season_month_start = 4,
   season_month_end = 9,
-  start_date = "2014-01-01",
-  end_date = "2014-12-31",
+  start_date = "2012-01-01",
+  end_date = "2012-12-31",
   use_survival_rates = FALSE,
   survival_rate_month = 3,
   survival_rate_day = 15,
@@ -163,7 +163,7 @@ val_cbs <- validate(
   mortality_frequency = "day",
   mortality_frequency_n = 1,
   management = TRUE,
-  treatment_dates = "2014-04-01",
+  treatment_dates = "2012-04-01",
   treatments_file = paste0(cbs_path, "trt.tif"),
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",
@@ -197,7 +197,7 @@ val_cbs <- validate(
   point_file = "",
   network_filename = "",
   network_movement = "walk",
-  use_distance = FALSE,
+  use_distance = TRUE,
   use_configuration = TRUE,
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
@@ -218,3 +218,5 @@ end_time <- Sys.time()
 time_taken <- round(end_time-start_time, 2)
 time_taken
 
+file_name <- paste(cbs_out, "validation_outputs_er_temp_2015.rdata", sep = "")
+save(val_cbs, file = file_name)

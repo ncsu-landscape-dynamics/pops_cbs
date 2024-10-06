@@ -1,5 +1,5 @@
 library(terra)
-
+source("temp_fun.R")
 
 
 # Path to file output location
@@ -7,11 +7,11 @@ outpath <- "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 start_year <- 2010
 end_year <- 2022
 
-
+wang_temp <- function(tmean){return(-0.07+0.88*(exp(-0.5*(log(tmean/23.08)/0.28)^2)))}
 
 # Temperature germination function
 temp_fun <- function(tmean) {
-  temp_values <- terra::ifel(tmean > 12 & tmean < 32, 100*(-0.07+0.88*(exp(-0.5*(log(tmean/23.08)/0.28)^2))), 0)
+  temp_values <- terra::ifel(tmean > 12.3 & tmean < 32,(1/wang_temp(23.08))*wang_temp(tmean), 0)
   return(temp_values)
 }
 
@@ -19,7 +19,7 @@ temp_fun <- function(tmean) {
 
 # Precipitation indicator function
 prcp_fun <- function(prcp) {
-  prcp_values <- terra::ifel(prcp < 0.25, 0, 1)
+  prcp_values <- terra::ifel(prcp < 2.5, 0, 1)
   return(prcp_values)
 }
 
@@ -64,8 +64,8 @@ for (year in seq(start_year, end_year)) {
     temp_values <- temp_fun(tmean)
     
     # Write raster files to outpath location
-    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, "_.tif"), overwrite = TRUE)
-    writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, "_.tif"), overwrite = TRUE)
+    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, ".tif"), overwrite = TRUE)
+    writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
     
   }
   
@@ -95,8 +95,8 @@ for (year in seq(start_year, end_year)) {
     temp_values <- temp_fun(tmean)
     
     # Write raster files to outpath location
-    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, "_.tif"), overwrite = TRUE)
-    writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, "_.tif"), overwrite = TRUE)
+    writeRaster(prcp_values, paste0(outpath, "precip/","prcp_coeff_", year, ".tif"), overwrite = TRUE)
+    writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
 
     
   }
@@ -134,14 +134,24 @@ for (year in seq(start_year_2, end_year)) {
   writeRaster(temp_values, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
 }
 
+cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-# Temperature values between 0 and 1
-for (year in seq(start_year, end_year)) {
-  temp_file <- rast(paste0(outpath, "temp/","temp_coeff_", year, ".tif"))
-  temp_file <- abs(temp_file/100)
-  writeRaster(temp_file, paste0(outpath, "temp/","temp_coeff_", year, ".tif"), overwrite = TRUE)
+# Weather forecasting
+for (year in seq(2010, 2022)) {
+  temp <- rast(paste0(cbs_path, "temp/temp_coeff_", year, ".tif"))
+  precip <- rast(paste0(cbs_path, "precip/prcp_coeff_", year, ".tif"))
+  assign(paste0("temp", year), temp)
+  assign(paste0("precip", year), precip)
 }
-
-
-
+crs(temp2010)<-crs(temp2011)<-crs(temp2012)<-crs(temp2013)<-crs(temp2014)<-crs(temp2015)<-crs(temp2016)<-crs(temp2017)<-crs(temp2018)<-crs(temp2019)<-crs(temp2020)<-crs(temp2021)<-crs(temp2022)
+names(temp2010)<-names(temp2011)<-names(temp2012)<-names(temp2013)<-names(temp2014)<-names(temp2015)<-names(temp2016)<-names(temp2017)<-names(temp2018)<-names(temp2019)<-names(temp2020)<-names(temp2021)<-names(temp2022)
+temp_mean <- mosaic(temp2010, temp2011, temp2012, temp2013, temp2014, temp2015, temp2016, 
+                    temp2017, temp2018, temp2019, temp2020, temp2021, temp2022, fun="mean")
+temp_sd <- stdev(temp2010, temp2011, temp2012, temp2013, temp2014, temp2015, temp2016, 
+                 temp2017, temp2018, temp2019, temp2020, temp2021, temp2022)
+names(temp_mean) <- paste0("tmean_", seq(1,365))
+names(temp_sd) <- paste0("tstdev_", seq(1,365))
+writeRaster(temp_mean, paste0(cbs_path, "temp/average_temp.tif"), overwrite=F)
+writeRaster(temp_sd, paste0(cbs_path, "temp/sd_temp.tif"), overwrite=F)
 

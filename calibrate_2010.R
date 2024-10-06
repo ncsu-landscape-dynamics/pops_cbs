@@ -86,14 +86,14 @@ cal_2010 <- PoPS::calibrate(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+05,
+  number_of_iterations = 1e+06,
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "configuration",
+  success_metric = "rmse",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -109,10 +109,10 @@ cal_2010 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "qc_means_2010.csv")
+file_name <- paste0(cbs_out, "er_temp_means_2010.csv")
 write.csv(cal_2010$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "qc_cov_matrix_2010.csv")
+file_name <- paste0(cbs_out, "er_temp_cov_matrix_2010.csv")
 write.csv(cal_2010$posterior_cov_matrix, file_name, row.names = FALSE)
 
 end_time <- Sys.time()

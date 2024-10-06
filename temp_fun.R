@@ -3,7 +3,7 @@ temp_fun <- function(tmean) {
   #' 
   #' 
   #' @param tmean spatRaster of mean temperature values
-  #' @return spatRaster of temperature germination results (Wang et al., 2014)
-  temp_values <- terra::ifel(tmean > 12 & tmean < 32, 100*(-0.07+0.88*(exp(-0.5*(log(tmean/23.08)/0.28)^2))), 0)
+  #' @return spatRaster of temperature germination results (Er et al., 2013)
+  temp_values <- terra::ifel(tmean > 4 & tmean < 37, round(floor((625000/14473))*(0.00000009868*(tmean-4)^2.9212*(37-tmean)^1.3909),2), 0)
   return(temp_values)
 }

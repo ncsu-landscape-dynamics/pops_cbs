@@ -16,9 +16,9 @@ load(paste0(cbs_out, "calibration_outputs_2010.rdata"))
 prior_means <- cal_2010$posterior_means
 prior_cov_matrix <- cal_2010$posterior_cov_matrix
 
-prior_means <- read.csv(paste0(cbs_out, "rd_means_2010.csv"))
+prior_means <- read.csv(paste0(cbs_out, "er_temp_means_2010.csv"))
 prior_means <- prior_means[[1]]
-prior_cov_matrix <- read.csv(paste0(cbs_out, "rd_cov_matrix_2010.csv"))
+prior_cov_matrix <- read.csv(paste0(cbs_out, "er_temp_cov_matrix_2010.csv"))
 
 start_time <- Sys.time()
 
@@ -28,13 +28,8 @@ cal_2011 <- PoPS::calibrate(
   infected_years_file = paste0(cbs_path, "infection/cbs_2012.tif"),
   number_of_observations = 28,
   prior_number_of_observations = 97,
-<<<<<<< HEAD
   prior_means = prior_means,
   prior_cov_matrix = prior_cov_matrix,
-=======
-  prior_means,
-  prior_cov_matrix,
->>>>>>> 5bfe1d20a272536d1114a6f5dc0f72e4b2d27a7b
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
   generation_size = 1000,
@@ -103,7 +98,7 @@ cal_2011 <- PoPS::calibrate(
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse and distance",
+  success_metric = "rmse",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -119,10 +114,10 @@ cal_2011 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "rd_means_2011.csv")
+file_name <- paste0(cbs_out, "er_temp_means_2011.csv")
 write.csv(cal_2011$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "rd_cov_matrix_2011.csv")
+file_name <- paste0(cbs_out, "er_temp_cov_matrix_2011.csv")
 write.csv(cal_2011$posterior_cov_matrix, file_name, row.names = FALSE)
 
 end_time <- Sys.time()

@@ -16,6 +16,10 @@ load(paste0(cbs_out, "calibration_outputs_2013.rdata"))
 prior_means <- cal_2013$posterior_means
 prior_cov_matrix <- cal_2013$posterior_cov_matrix
 
+prior_means <- read.csv(paste0(cbs_out, "exp_means_2013.csv"))
+prior_means <- prior_means[[1]]
+prior_cov_matrix <- read.csv(paste0(cbs_out, "exp_cov_matrix_2013.csv"))
+
 start_time <- Sys.time()
 
 # Calibration for PoPS model
@@ -36,7 +40,7 @@ cal_2014 <- PoPS::calibrate(
   temp = TRUE,
   temperature_coefficient_file = paste0(cbs_path, "temp/temp_coeff_2015.tif"),
   precip = TRUE,
-  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2015_.tif"),
+  precipitation_coefficient_file = paste0(cbs_path, "precip/prcp_coeff_2015.tif"),
   model_type = "SI",
   latency_period = 0,
   time_step = 'day',
