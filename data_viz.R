@@ -173,14 +173,25 @@ text(190, 40, paste0('y=', myfit$coefficients[1],' + ', myfit$coefficients[2], '
 duration_sensitivity[6] <- myfit$coefficients[2]
 
 # Validation comparisons
-for (i in seq(2013, 2015)) {
-  load(paste0(cbs_out, "validation_outputs_", i, ".erata"))
-  load(paste0(cbs_out, "validation_outputs_er_temp_", i, ".erata"))
-  assign(paste0("val_er_", i), val_cbs)
+for (i in seq(2013, 2021)) {
+  load(paste0(cbs_out, "validation_outputs_", i, ".rdata"))
+  assign(paste0("val_", i), val_cbs)
 }
 
-configuration_results <- as.data.frame(rbind(cbind(val_2013$cum_output_step_1$configuration_disagreement, rep(2013,100), rep("wang temp", 100)), cbind(as.numeric(val_2014$cum_output_step_1$configuration_disagreement), rep(2014,100), rep("wang temp", 100)), cbind(as.numeric(val_2015$cum_output_step_1$configuration_disagreement), rep(2015,100), rep("wang temp", 100)), cbind(as.numeric(val_er_2013$cum_output_step_1$configuration_disagreement), rep(2013,100), rep("er temp", 100)), cbind(as.numeric(val_er_2014$cum_output_step_1$configuration_disagreement), rep(2014,100), rep("er temp", 100)), cbind(as.numeric(val_er_2015$cum_output_step_1$configuration_disagreement), rep(2015,100), rep("er temp", 100))))
-quantity_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_step_1$quantity_disagreement), rep(2013,100), rep("wang temp", 100)), cbind(as.numeric(val_2014$cum_output_step_1$quantity_disagreement), rep(2014,100), rep("wang temp", 100)), cbind(as.numeric(val_2015$cum_output_step_1$quantity_disagreement), rep(2015,100), rep("wang temp", 100)), cbind(as.numeric(val_er_2013$cum_output_step_1$quantity_disagreement), rep(2013,100), rep("er temp", 100)), cbind(as.numeric(val_er_2014$cum_output_step_1$quantity_disagreement), rep(2014,100), rep("er temp", 100)), cbind(as.numeric(val_er_2015$cum_output_step_1$quantity_disagreement), rep(2015,100), rep("er temp", 100))))
+configuration_results <- as.data.frame(rbind(cbind(val_2013$cum_output_step_1$configuration_disagreement, rep(2013,100), rep("wang temp", 100)), 
+                                             cbind(as.numeric(val_2014$cum_output_step_1$configuration_disagreement), rep(2014,100), rep("wang temp", 100)), 
+                                             cbind(as.numeric(val_2015$cum_output_step_1$configuration_disagreement), rep(2015,100), rep("wang temp", 100)), 
+                                             cbind(as.numeric(val_er_2013$cum_output_step_1$configuration_disagreement), rep(2013,100), rep("er temp", 100)), 
+                                             cbind(as.numeric(val_er_2014$cum_output_step_1$configuration_disagreement), rep(2014,100), rep("er temp", 100)), 
+                                             cbind(as.numeric(val_er_2015$cum_output_step_1$configuration_disagreement), rep(2015,100), rep("er temp", 100))))
+
+quantity_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_step_1$quantity_disagreement), rep(2013,100), rep("wang temp", 100)), 
+                                        cbind(as.numeric(val_2014$cum_output_step_1$quantity_disagreement), rep(2014,100), rep("wang temp", 100)), 
+                                        cbind(as.numeric(val_2015$cum_output_step_1$quantity_disagreement), rep(2015,100), rep("wang temp", 100)), 
+                                        cbind(as.numeric(val_er_2013$cum_output_step_1$quantity_disagreement), rep(2013,100), rep("er temp", 100)), 
+                                        cbind(as.numeric(val_er_2014$cum_output_step_1$quantity_disagreement), rep(2014,100), rep("er temp", 100)), 
+                                        cbind(as.numeric(val_er_2015$cum_output_step_1$quantity_disagreement), rep(2015,100), rep("er temp", 100))))
+
 colnames(configuration_results) <- c("y", "year", "temp coeff")
 colnames(quantity_results) <- c("y", "year", "temp coeff")
 
@@ -197,3 +208,41 @@ ggplot(data = quantity_results, aes(x=as.factor(year), y=as.numeric(y))) +
   ggtitle("Quantity diagreement by year and temp coeff")
 
 ggsave(paste0(cbs_out, "quantity_disagreement_temp.png"))
+
+configuration_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_step_1$configuration_disagreement), rep(2013,100)), 
+                                             cbind(as.numeric(val_2014$cum_output_step_1$configuration_disagreement), rep(2014,100)), 
+                                             cbind(as.numeric(val_2015$cum_output_step_1$configuration_disagreement), rep(2015,100)), 
+                                             cbind(as.numeric(val_2016$cum_output_step_1$configuration_disagreement), rep(2016,100)), 
+                                             cbind(as.numeric(val_2017$cum_output_step_1$configuration_disagreement), rep(2017,100)), 
+                                             cbind(as.numeric(val_2018$cum_output_step_1$configuration_disagreement), rep(2018,100)),
+                                             cbind(as.numeric(val_2019$cum_output_step_1$configuration_disagreement), rep(2019,100)),
+                                             cbind(as.numeric(val_2020$cum_output_step_1$configuration_disagreement), rep(2020,100)),
+                                             cbind(as.numeric(val_2021$cum_output_step_1$configuration_disagreement), rep(2021,100))))
+
+quantity_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_step_1$quantity_disagreement), rep(2013,100)), 
+                                        cbind(as.numeric(val_2014$cum_output_step_1$quantity_disagreement), rep(2014,100)), 
+                                        cbind(as.numeric(val_2015$cum_output_step_1$quantity_disagreement), rep(2015,100)), 
+                                        cbind(as.numeric(val_2016$cum_output_step_1$quantity_disagreement), rep(2016,100)), 
+                                        cbind(as.numeric(val_2017$cum_output_step_1$quantity_disagreement), rep(2017,100)), 
+                                        cbind(as.numeric(val_2018$cum_output_step_1$quantity_disagreement), rep(2018,100)),
+                                        cbind(as.numeric(val_2019$cum_output_step_1$quantity_disagreement), rep(2019,100)),
+                                        cbind(as.numeric(val_2020$cum_output_step_1$quantity_disagreement), rep(2020,100)),
+                                        cbind(as.numeric(val_2021$cum_output_step_1$quantity_disagreement), rep(2021,100))))
+
+
+colnames(configuration_results) <- c("y", "year")
+colnames(quantity_results) <- c("y", "year")
+
+ggplot(data = configuration_results, aes(x=as.factor(year), y=as.numeric(y))) +
+  geom_boxplot() +
+  xlab("hindcast year") + ylab("configuration disagreement") +
+  ggtitle("Configuration disagreement by year and temp coeff")
+
+ggsave(paste0(cbs_out, "configuration_disagreements.png"))
+
+ggplot(data = quantity_results, aes(x=as.factor(year), y=as.numeric(y))) +
+  geom_boxplot() +
+  xlab("hindcast year") + ylab("quantity disagreement") +
+  ggtitle("Quantity diagreement by year and temp coeff")
+
+ggsave(paste0(cbs_out, "quantity_disagreements.png"))
