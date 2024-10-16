@@ -16,15 +16,15 @@ load(paste0(cbs_out, "calibration_outputs_2012.rdata"))
 prior_means <- cal_2012$posterior_means
 prior_cov_matrix <- cal_2012$posterior_cov_matrix
 
-prior_means <- read.csv(paste0(cbs_out, "er_temp_means_2012.csv"))
+prior_means <- read.csv(paste0(cbs_out, "posterior_means_pa_2012.csv"))
 prior_means <- prior_means[[1]]
-prior_cov_matrix <- read.csv(paste0(cbs_out, "er_temp_cov_matrix_2012.csv"))
+prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_pa_2012.csv"))
 
 start_time <- Sys.time()
 
 # Calibration for PoPS model
 cal_2013 <- PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "infection/cbs_2014.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_pa_2014.tif"),
   number_of_observations = 39,
   prior_number_of_observations = 151,
   prior_means,
@@ -34,7 +34,7 @@ cal_2013 <- PoPS::calibrate(
   generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
-  infected_file_list = paste0(cbs_path, "infection/cbs_2013.tif"),
+  infected_file_list = paste0(cbs_path, "infection/cbs_pa_2013.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
@@ -90,14 +90,14 @@ cal_2013 <- PoPS::calibrate(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+06,
+  number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "summary_outputs",
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse and distance",
+  success_metric = "quantity, allocation, and configuration",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -113,10 +113,10 @@ cal_2013 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "er_temp_means_2013.csv")
+file_name <- paste0(cbs_out, "posterior_means_pa_2013.csv")
 write.csv(cal_2013$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "er_temp_cov_matrix_2013.csv")
+file_name <- paste0(cbs_out, "posterior_cov_matrix_pa_2013.csv")
 write.csv(cal_2013$posterior_cov_matrix, file_name, row.names = FALSE)
 
 end_time <- Sys.time()

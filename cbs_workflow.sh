@@ -12,3 +12,4 @@ Rscript calibrate_2017.r
 Rscript calibrate_2018.r
 Rscript calibrate_2019.r
 Rscript calibrate_2020.r
+Rscript calibrate_2021.r

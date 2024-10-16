@@ -11,18 +11,13 @@ library(terra)
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-# posterior means from previous calibration
-prior_means <- read.csv(paste0(cbs_out, "posterior_means_2021.csv"))
-prior_means <- prior_means$x
-prior_means <- prior_means[1:6]
-
-# posterior covariance matrix from previous calibration
-prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_2021.csv"))
-prior_cov_matrix <- as.matrix(prior_cov_matrix)
+prior_means <- read.csv(paste0(cbs_out, "posterior_means_pa_2021.csv"))
+prior_means <- prior_means[[1]]
+prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_pa_2021.csv"))
 
 # Calibration for PoPS model
 PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "inf_years_file13.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_2022.tif"),
   number_of_observations = 18,
   prior_number_of_observations = 478,
   prior_means = prior_means,

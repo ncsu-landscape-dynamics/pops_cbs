@@ -1,26 +1,34 @@
 library(terra)
+library(lubridate)
+library(dynamicSDM)
 
 # Set up parameters
 start_year <- 2010
 end_year <- 2022
 
 # Outpath
-outpath <- "/Volumes/cmjone25/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
+outpath <- "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 
 # Read occurrence and host data
-cbs <- read.csv("/Volumes/cmjone25/Data/Original/pest-occurrence/Citrus_Black_Spot/MasterCBS2022.csv")
-cbs_host <- vect("/Volumes/cmjone25/Data/Original/pest-occurrence/Citrus_Black_Spot/CHRPMultiBlocks.shp")
+cbs <- read.csv("Z:/Data/Original/pest-occurrence/Citrus_Black_Spot/MasterCBS2022.csv")
+cbs_host <- vect("Z:/Data/Original/pest-occurrence/Citrus_Black_Spot/CHRPMultiBlocks.shp")
 
 # Correct out of place long value
 cbs$Long = -1*abs(cbs$Long)
-
+cbs$Receive.Date <- gsub('//', '/', cbs$Receive.Date)
 # Initialize count column for unique occurrences
 cbs$positive = 1
 cbs_host$area = 1
 
+cbs$year = year(as.Date(cbs$Receive.Date, format = "%m/%d/%y"))
+cbs$month = month(as.Date(cbs$Receive.Date, format = "%m/%d/%y"))
+cbs$day = day(as.Date(cbs$Receive.Date, format = "%m/%d/%y"))
+
 # Plot overall infection over collection period against host data
 plot(cbs_host, xlim=c(-88,-79), ylim=c(25,31), col="light yellow", border="light gray")
-points(cbs$Long, cbs$Lat, cex = 0.5, col = 'red')
+zoom(cbs_host)
+points(positives$Long, positives$Lat, pch = 16, cex = 1, col = 'red')
+points(ps_abs$y, ps_abs$x, pch = 16, cex = 1.5, col = 'green')
 
 host_rast <- function(z, cbs_host) {
   #' host_ext
@@ -42,7 +50,7 @@ host_cbs <- host_rast(weather, cbs_host)
 writeRaster(host_cbs, paste0(outpath, "host/host.tif"), overwrite = T)
 
 # Test abandoned acreage assuming 70% remains in infected counties
-counties <- vect("/Volumes/cmjone25/Data/Vector/USA/us_lower_48_counties.gpkg")
+counties <- vect("Z:/Data/Vector/USA/us_lower_48_counties.gpkg")
 counties <- counties[counties$STATE_NAME == "Florida"]
 counties <- project(counties, crs(host_cbs))
 counties <- counties[counties$NAME == "Brevard" | counties$NAME == "Charlotte" | counties$NAME == "Collier" | counties$NAME == "De Soto" | counties$NAME == "Glades" | counties$NAME == "Hardee" | counties$NAME == "Hendry" | counties$NAME == "Hernando" | counties$NAME == "Highlands" | counties$NAME == "Hillsborough" | counties$NAME == "Indian River" | counties$NAME == "Lake" | counties$NAME == "Lee" | counties$NAME == "Manatee" | counties$NAME == "Marion" | counties$NAME == "Martin" | counties$NAME == "Okeechobee" | counties$NAME == "Orange" | counties$NAME == "Osceola" | counties$NAME == "Pasco" | counties$NAME == "Polk" | counties$NAME == "Putnam" | counties$NAME == "St. Lucie" | counties$NAME == "Sarasota" | counties$NAME == "Seminole" | counties$NAME == "Volusia"]
@@ -67,7 +75,7 @@ months_to_check <- c("September", "October", "November", "December")
 pattern <- paste(months_to_check, collapse = "|")
 
 for (year in seq(start_year, end_year)) {
-  # infections from september to december
+  # infections from September to December
   sp <- cbs[grep(year, as.Date(cbs$Receive.Date, format = "%m/%d/%y")),]
   sp1 <- sp[grep(pattern, months(as.Date(sp$Receive.Date, format = "%m/%d/%y"))), ]
   sp2 <- vect(sp1, geom = c("Long", "Lat"), crs=crs(cbs_host))
@@ -106,3 +114,42 @@ for (season in 1:13) {
   writeRaster(inf_after_trt, paste0(outpath, "infection/season/inf_after_", season, ".tif"), overwrite = T)
 }
 
+library(lubridate)
+
+ps_abs <- dynamicSDM::spatiotemp_pseudoabs(spatial.method = "buffer", 
+                                           temporal.method = "buffer", 
+                                           occ.data = data.frame(cbind(x = cbs$Long, y = cbs$Lat, 
+                                                                       year = cbs$year, 
+                                                                       month = cbs$month, 
+                                                                       day = cbs$day)),
+                                           spatial.buffer = 5000, 
+                                           n.pseudoabs = 497,
+                                           temporal.ext = c("2010-01-01", "2022-12-31"), 
+                                           temporal.buffer = 0,
+                                           prj = "+proj=longlat +datum=WGS84")
+
+# Plot overall infection over collection period against host data
+plot(cbs_host, xlim=c(-88,-79), ylim=c(25,31), col="light yellow", border="light gray")
+plot(cbs$Long, cbs$Lat, pch = 16, cex = 1, col = 'red')
+points(ps_abs$x, ps_abs$y, pch = 16, cex = 1, col = 'green')
+
+names(ps_abs)[1:2] <- c("Long", "Lat")
+ps_abs$positive <- 0
+
+cbs_true <- cbs[,c("Long", "Lat", "year", "month", "day", "positive")]
+all_points <- rbind(cbs_true, ps_abs)
+
+# Yearly infection
+for (year in seq(start_year, end_year)) {
+  # yearly infections
+  sp <- all_points[all_points$year == year,]
+  sp1 <- vect(sp, geom = c("Long", "Lat"), crs=crs(cbs_host))
+  sp1 <- project(sp1, crs(host))
+  infections_year <- terra::rasterize(sp1, host, field = "positive", fun = "sum")
+  writeRaster(infections_year, paste0(outpath, "infection/cbs_pa_", year, ".tif"), overwrite = T)
+  
+  # Infections after treatment is applied
+  inf_after_trt <- round(infections_year*0.171)
+  inf_after_trt <- terra::ifel(inf_after_trt == 0, NA, inf_after_trt)
+  writeRaster(inf_after_trt, paste0(outpath, "infection/inf_after_pa_", year, ".tif"), overwrite = T)
+}

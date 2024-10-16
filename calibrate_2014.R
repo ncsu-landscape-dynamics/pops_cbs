@@ -11,20 +11,15 @@ library(terra)
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-# load calibration outputs
-load(paste0(cbs_out, "calibration_outputs_2013.rdata"))
-prior_means <- cal_2013$posterior_means
-prior_cov_matrix <- cal_2013$posterior_cov_matrix
-
-prior_means <- read.csv(paste0(cbs_out, "exp_means_2013.csv"))
+prior_means <- read.csv(paste0(cbs_out, "posterior_means_pa_2013.csv"))
 prior_means <- prior_means[[1]]
-prior_cov_matrix <- read.csv(paste0(cbs_out, "exp_cov_matrix_2013.csv"))
+prior_cov_matrix <- read.csv(paste0(cbs_out, "posterior_cov_matrix_pa_2013.csv"))
 
 start_time <- Sys.time()
 
 # Calibration for PoPS model
 cal_2014 <- PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "infection/cbs_2015.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_pa_2015.tif"),
   number_of_observations = 33,
   prior_number_of_observations = 190,
   prior_means,
@@ -34,7 +29,7 @@ cal_2014 <- PoPS::calibrate(
   generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
-  infected_file_list = paste0(cbs_path, "infection/cbs_2014.tif"),
+  infected_file_list = paste0(cbs_path, "infection/cbs_pa_2014.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
@@ -90,14 +85,14 @@ cal_2014 <- PoPS::calibrate(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+06,
+  number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = c("summary_outputs"),
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse",
+  success_metric = "quantity, allocation, and configuration",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -118,11 +113,9 @@ end_time <- Sys.time()
 time_taken <- round(end_time - start_time, 2)
 time_taken
 
-file_name <- paste0(cbs_out, "posterior_means_2014.csv")
+file_name <- paste0(cbs_out, "posterior_means_pa_2014.csv")
 write.csv(cal_2014$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "posterior_cov_matrix_2014.csv")
+file_name <- paste0(cbs_out, "posterior_cov_matrix_pa_2014.csv")
 write.csv(cal_2014$posterior_cov_matrix, file_name, row.names = FALSE)
 
-file_name <- paste(cbs_out, "calibration_outputs_2014.rdata", sep = "")
-save(cal_2014, file = file_name)

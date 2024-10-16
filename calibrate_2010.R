@@ -11,16 +11,12 @@ library(terra)
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-total_pops_file = rast(paste0(cbs_path, "host/host.tif"))
-total_pops_file = 100*total_pops_file*(1/total_pops_file)
-writeRaster(total_pops_file, paste0(cbs_path, "total_pops_file.tif"), overwrite = T)
-
 start_time <- Sys.time()
 
 # Calibration for PoPS model 2010
 # Begin 4/25 at 11:30
 cal_2010 <- PoPS::calibrate(
-  infected_years_file = paste0(cbs_path, "infection/cbs_2011.tif"),
+  infected_years_file = paste0(cbs_path, "infection/cbs_pa_2011.tif"),
   number_of_observations = 97,
   prior_number_of_observations = 0,
   prior_means = c(0, 0, 0, 0, 0, 0),
@@ -30,7 +26,7 @@ cal_2010 <- PoPS::calibrate(
   generation_size = 1000,
   pest_host_table = paste0(cbs_path, "pest_host_table_cbs.csv"),
   competency_table = paste0(cbs_path, "competency_table_cbs.csv"),
-  infected_file_list = paste0(cbs_path, "infection/cbs_2010.tif"),
+  infected_file_list = paste0(cbs_path, "infection/cbs_pa_2010.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
   temp = TRUE,
@@ -86,14 +82,14 @@ cal_2010 <- PoPS::calibrate(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+06,
+  number_of_iterations = 1e+05,
   exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = cbs_out,
   network_filename = "",
   network_movement = "walk",
-  success_metric = "rmse",
+  success_metric = "quantity, allocation, and configuration",
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -109,15 +105,12 @@ cal_2010 <- PoPS::calibrate(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "er_temp_means_2010.csv")
+file_name <- paste0(cbs_out, "posterior_means_pa_2010.csv")
 write.csv(cal_2010$posterior_means, file_name, row.names = FALSE)
 
-file_name <- paste0(cbs_out, "er_temp_cov_matrix_2010.csv")
+file_name <- paste0(cbs_out, "posterior_cov_matrix_pa_2010.csv")
 write.csv(cal_2010$posterior_cov_matrix, file_name, row.names = FALSE)
 
 end_time <- Sys.time()
 time_taken <- round(end_time-start_time, 2)
 time_taken
-
-file_name <- paste(cbs_out, "calibration_outputs_2010_3.rdata", sep = "")
-save(cal_2010, file = file_name)
