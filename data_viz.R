@@ -3,6 +3,7 @@ library(ggplot2)
 library(reshape2)
 library(dplyr)
 library(plotly)
+library(tidyterra)
 
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
@@ -173,7 +174,7 @@ text(190, 40, paste0('y=', myfit$coefficients[1],' + ', myfit$coefficients[2], '
 duration_sensitivity[6] <- myfit$coefficients[2]
 
 # Validation comparisons
-for (i in seq(2013, 2021)) {
+for (i in seq(2013, 2022)) {
   load(paste0(cbs_out, "validation_outputs_", i, ".rdata"))
   assign(paste0("val_", i), val_cbs)
 }
@@ -217,7 +218,8 @@ configuration_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_outpu
                                              cbind(as.numeric(val_2018$cum_output_step_1$configuration_disagreement), rep(2018,100)),
                                              cbind(as.numeric(val_2019$cum_output_step_1$configuration_disagreement), rep(2019,100)),
                                              cbind(as.numeric(val_2020$cum_output_step_1$configuration_disagreement), rep(2020,100)),
-                                             cbind(as.numeric(val_2021$cum_output_step_1$configuration_disagreement), rep(2021,100))))
+                                             cbind(as.numeric(val_2021$cum_output_step_1$configuration_disagreement), rep(2021,100)),
+                                             cbind(as.numeric(val_2022$cum_output_step_1$configuration_disagreement), rep(2022,100))))
 
 quantity_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_step_1$quantity_disagreement), rep(2013,100)), 
                                         cbind(as.numeric(val_2014$cum_output_step_1$quantity_disagreement), rep(2014,100)), 
@@ -227,22 +229,175 @@ quantity_results <- as.data.frame(rbind(cbind(as.numeric(val_2013$cum_output_ste
                                         cbind(as.numeric(val_2018$cum_output_step_1$quantity_disagreement), rep(2018,100)),
                                         cbind(as.numeric(val_2019$cum_output_step_1$quantity_disagreement), rep(2019,100)),
                                         cbind(as.numeric(val_2020$cum_output_step_1$quantity_disagreement), rep(2020,100)),
-                                        cbind(as.numeric(val_2021$cum_output_step_1$quantity_disagreement), rep(2021,100))))
+                                        cbind(as.numeric(val_2021$cum_output_step_1$quantity_disagreement), rep(2021,100)),
+                                        cbind(as.numeric(val_2022$cum_output_step_1$quantity_disagreement), rep(2022,100))))
 
 
 colnames(configuration_results) <- c("y", "year")
 colnames(quantity_results) <- c("y", "year")
 
-ggplot(data = configuration_results, aes(x=as.factor(year), y=as.numeric(y))) +
+plot1 <- ggplot(data = configuration_results, aes(x=as.factor(year), y=as.numeric(y))) +
   geom_boxplot() +
-  xlab("hindcast year") + ylab("configuration disagreement") +
-  ggtitle("Configuration disagreement by year and temp coeff")
+  scale_y_continuous(n.breaks = 10, limits = c(0,1), minor_breaks = NULL, expand = c(0.0,0)) +
+  xlab("") + ylab("configuration disagreement") +
+  theme(axis.text = element_text(size = 6),
+        axis.title = element_text(size = 9, face = "bold"),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.text.x.bottom = element_blank()) +
+  geom_vline(xintercept = "2017", colour = "steelblue3", linetype = "longdash",
+             alpha = 0.5)
 
-ggsave(paste0(cbs_out, "configuration_disagreements.png"))
-
-ggplot(data = quantity_results, aes(x=as.factor(year), y=as.numeric(y))) +
+plot2 <- ggplot(data = quantity_results, aes(x=as.factor(year), y=as.numeric(y))) +
   geom_boxplot() +
+  scale_y_continuous(n.breaks = 10, limits = c(0,250), minor_breaks = NULL, expand = c(0.0, 0)) +
   xlab("hindcast year") + ylab("quantity disagreement") +
-  ggtitle("Quantity diagreement by year and temp coeff")
+  theme(axis.text = element_text(size = 6),
+        axis.title = element_text(size = 9, face = "bold")) +
+  geom_vline(xintercept = "2017", colour = "steelblue3", linetype = "longdash",
+             alpha = 0.5)
 
-ggsave(paste0(cbs_out, "quantity_disagreements.png"))
+grid.arrange(plot1,plot2,ncol=1)
+
+ggsave(plot = grid.arrange(plot1, plot2, ncol = 1), paste0(cbs_out, "quantity_configuration_disagreement_irma.jpeg"), width = 7, units = "in", dpi = 300)
+
+# Forecasting output
+library(terra)
+library(tidyterra)
+library(USAboundaries)
+library(cowplot)
+library(ggspatial)
+
+# Read in Forecasting files
+sim_sd_files <- list.files(paste0(cbs_out, "pops_runs/manage/"),
+                           pattern = "*sd",
+                           full.names = T)
+
+sim_mean_files <- list.files(paste0(cbs_out, "pops_runs/manage/"),
+                           pattern = "*mean",
+                           full.names = T)
+
+sim_max_files <- list.files(paste0(cbs_out, "pops_runs/manage/"),
+                           pattern = "*max",
+                           full.names = T)
+
+sim_min_files <- list.files(paste0(cbs_out, "pops_runs/manage/"),
+                           pattern = "*min",
+                           full.names = T)
+
+sim_prob_files <- list.files(paste0(cbs_out, "pops_runs/manage/"),
+                           pattern = "*probability",
+                           full.names = T)
+
+sd_stack <- rast(lapply(sim_sd_files, function(x) rast(x)))
+mean_stack <- rast(lapply(sim_mean_files, function(x) rast(x)))
+prob_stack <- rast(lapply(sim_prob_files, function(x) rast(x)))
+min_stack <- rast(lapply(sim_min_files, function(x) rast(x)))
+max_stack <- rast(lapply(sim_max_files, function(x) rast(x)))
+
+sd_stack <- project(sd_stack, crs(fl_counties_highres))
+mean_stack <- project(mean_stack, crs(fl_counties_highres))
+prob_stack <- project(prob_stack, crs(fl_counties_highres))
+min_stack <- project(min_stack, crs(fl_counties_highres))
+max_stack <- project(max_stack, crs(fl_counties_highres))
+names(prob_stack) <- seq(2023, 2032)
+
+# Read in Forecasting files
+sim_sd_nm <- rast(list.files(paste0(cbs_out, "pops_runs/no_management/"),
+                        pattern = "*sd",
+                        full.names = T))
+sim_mean_nm <- rast(list.files(paste0(cbs_out, "pops_runs/no_management/"),
+                        pattern = "*mean",
+                        full.names = T))
+sim_min_nm <- rast(list.files(paste0(cbs_out, "pops_runs/no_management/"),
+                        pattern = "*min",
+                        full.names = T))
+sim_max_nm <- rast(list.files(paste0(cbs_out, "pops_runs/no_management/"),
+                        pattern = "*max",
+                        full.names = T))
+sim_prob_nm <- rast(list.files(paste0(cbs_out, "pops_runs/no_management/"),
+                        pattern = "*probability",
+                        full.names = T))
+
+ggplot() +
+  geom_spatvector(data = c_clipped, size = 5, col = "white", fill = "lightgray") +
+  geom_spatraster(data = probs_clipped) +
+  facet_wrap(~lyr) +
+  scale_fill_whitebox_c(
+    palette = "muted",
+    labels = scales::label_number(suffix = "%"),
+    n.breaks = 12,,
+    guide = guide_legend(reverse = T)) + 
+  coord_sf(crs = 4326) + 
+  theme_minimal() +
+  labs( fill = "") + 
+  theme(axis.text = element_text(size = 6),
+        panel.grid = element_blank()) +
+  ggtitle("Managed Infection Probability, Immokalee area, Florida (2023-2032)")
+
+ggsave(filename = paste0(cbs_out, "pops_runs/manage/infections_immokalee.png"), width = 7, units = "in", dpi = 300)
+
+# High resolution shapefile for study area
+fl_counties_highres <- us_counties(states = "Florida", resolution = "high")
+fl_counties_cropped <- fl_counties_highres[fl_counties_highres$name == "Hendry" | fl_counties_highres$name == "Collier" | fl_counties_highres$name == "Lee" | fl_counties_highres$name == "Glades" | fl_counties_highres$name == "Charlotte", ]
+fl_projection <- state_plane("FL")
+fl_counties_highres <- st_transform(fl_counties_highres, fl_projection)
+fl_counties_cropped <- st_transform(fl_counties_cropped, fl_projection)
+
+# Florida boundary plot
+plot_fl <- fl_counties_highres %>% 
+  ggplot() + 
+  geom_sf() + 
+  coord_sf(crs = fl_projection) + 
+  theme(panel.background = element_rect(fill = NA), 
+        axis.text = element_blank(), 
+        axis.ticks = element_blank(),
+        legend.position = "topleft") +
+  # annotation_scale(location = "br") +
+  layer_spatial(data = prob_stack[[10]], na.rm = T) +
+  scale_fill_gradientn(na.value = NA, colors = rev(brewer.pal(7,"RdYlGn")),
+                       name = 'Infection Probability')
+
+# Study area boundary plot
+# plot_swfl <- fl_counties_cropped %>% 
+#   ggplot() + 
+#   geom_sf() + 
+#   coord_sf(crs = fl_projection) + 
+#   theme(panel.background = element_rect(fill = NA), 
+#         axis.text = element_blank(), 
+#         axis.ticks = element_blank(),
+#         plot.background = element_rect(color = "black", linewidth = 0.5))
+
+main_map <- plot_fl + geom_rect(xmin = st_bbox(fl_counties_cropped)[[1]],
+                                ymin = st_bbox(fl_counties_cropped)[[2]],
+                                xmax = st_bbox(fl_counties_cropped)[[3]],
+                                ymax = st_bbox(fl_counties_cropped)[[4]],
+                                fill = NA,
+                                col = "black",
+                                linewidth = 0.65) +
+  annotation_scale(location = 'br')
+
+# Plot study area as cropout of large boundary
+ggdraw() +
+  draw_plot(main_map) +
+  annotation_north_arrow(height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         location = 'br',
+                         pad_y = unit(1, "cm"),
+                         pad_x = unit(0.5, "cm")) +
+  draw_plot(
+    {
+      main_map + 
+        coord_sf(
+          xlim = c(st_bbox(fl_counties_cropped)[[1]],
+                   st_bbox(fl_counties_cropped)[[3]]),
+          ylim = c(st_bbox(fl_counties_cropped)[[2]], 
+                   st_bbox(fl_counties_cropped)[[4]]),
+          expand = FALSE) +
+        theme(legend.position = "none")
+    },
+    x = 0, 
+    y = 0,
+    width = 0.6, 
+    height = 0.6)
+ggsave(filename = paste0(cbs_out, "infection_managed_inset.png"), width = 7, units = "in", dpi = 300)
