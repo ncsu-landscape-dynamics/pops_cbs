@@ -127,9 +127,12 @@ cal11_22 <- bayesian_mnn_checks(cal11_21$posterior_means,
 parameter_means = cal11_22$posterior_means
 parameter_cov_matrix = cal11_22$posterior_cov_matrix
 
+number_of_cores = detectCores() - 1
+
+# Forecasting without preventative management
 start_time <- Sys.time()
 
-cbs_manage <- pops_multirun(
+cbs_nm <- pops_multirun(
   infected_file_list = paste0(cbs_path, "infection/cbs_2022.tif"),
   host_file_list = paste0(cbs_path, "host/host.tif"),
   total_populations_file = paste0(cbs_path, "total_pops_file.tif"),
@@ -147,7 +150,7 @@ cbs_manage <- pops_multirun(
   season_month_start = 4,
   season_month_end = 9,
   start_date = "2023-01-01",
-  end_date = "2024-12-31",
+  end_date = "2050-12-31",
   use_survival_rates = FALSE,
   survival_rate_month = 3,
   survival_rate_day = 15,
@@ -158,7 +161,7 @@ cbs_manage <- pops_multirun(
   lethal_temperature_month = 1,
   mortality_frequency = "day",
   mortality_frequency_n = 1,
-  management = TRUE,
+  management = FALSE,
   treatment_dates = "2023-04-01",
   treatments_file = paste0(cbs_path, "trt.tif"),
   treatment_method = "ratio",
@@ -167,7 +170,7 @@ cbs_manage <- pops_multirun(
   natural_dir = "NONE",
   anthropogenic_dir = "NONE",
   number_of_iterations = 100,
-  number_of_cores = 7,
+  number_of_cores = number_of_cores,
   pesticide_duration = 180,
   pesticide_efficacy = 0.829,
   random_seed = NULL,
@@ -210,31 +213,27 @@ cbs_manage <- pops_multirun(
   county_level_infection_data = FALSE
 )
 
-file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_probability", yr+1, ".tif")
-writeRaster(cbs_manage$probability, file_name, overwrite=F)
-file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_mean", yr+1, ".tif")
-writeRaster(cbs_manage$simulation_mean, file_name, overwrite=F)
-file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_sd", yr+1, ".tif")
-writeRaster(cbs_manage$simulation_sd, file_name, overwrite=F)
-file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_min", yr+1, ".tif")
-writeRaster(cbs_manage$simulation_min, file_name, overwrite=F)
-file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_max", yr+1, ".tif")
-writeRaster(cbs_manage$simulation_max, file_name, overwrite=F)
-file_name <- paste0(cbs_out, "pops_runs/manage/", "multirun_outputs", yr+1, ".rdata")
-save(cbs_manage, file = file_name)
+file_name <- paste0(cbs_out, "pops_runs/no_management/", "simulation_probability.tif")
+writeRaster(cbs_nm$probability, file_name, overwrite=T)
+file_name <- paste0(cbs_out, "pops_runs/no_management/", "simulation_mean.tif")
+writeRaster(cbs_nm$simulation_mean, file_name, overwrite=T)
+file_name <- paste0(cbs_out, "pops_runs/no_management/", "simulation_sd.tif")
+writeRaster(cbs_nm$simulation_sd, file_name, overwrite=T)
+file_name <- paste0(cbs_out, "pops_runs/no_management/", "simulation_min.tif")
+writeRaster(cbs_nm$simulation_min, file_name, overwrite=T)
+file_name <- paste0(cbs_out, "pops_runs/no_management/", "simulation_max.tif")
+writeRaster(cbs_nm$simulation_max, file_name, overwrite=T)
+file_name <- paste0(cbs_out, "pops_runs/no_management/", "multirun_outputs.rdata")
+save(cbs_nm, file = file_name)
 
-end_time <- Sys.time()
-time_taken <- round(end_time-start_time, 2)
-time_taken
-
-start_time <- Sys.time()
-
-for (yr in seq(23, 31)) {
+for (yr in seq(22, 49)) {
   if (yr == 22) {
     infected_file_list = paste0(cbs_path, "infection/cbs_2022.tif")
+    use_initial_condition_uncertainty = FALSE
   }
   else {
-    infected_file_list = paste0(cbs_out, "pops_runs/manage/", "simulation_mean", yr, ".tif")
+    infected_file_list = paste0(cbs_out, "pops_runs/manage/", "simulation_uncert", yr, ".tif")
+    use_initial_condition_uncertainty = TRUE
   }
   cbs_manage <- pops_multirun(
     infected_file_list,
@@ -274,7 +273,7 @@ for (yr in seq(23, 31)) {
     natural_dir = "NONE",
     anthropogenic_dir = "NONE",
     number_of_iterations = 100,
-    number_of_cores = 7,
+    number_of_cores = number_of_cores,
     pesticide_duration = 180,
     pesticide_efficacy = 0.829,
     random_seed = NULL,
@@ -302,7 +301,7 @@ for (yr in seq(23, 31)) {
     output_folder_path = cbs_out,
     network_filename = "",
     network_movement = "walk",
-    use_initial_condition_uncertainty = FALSE,
+    use_initial_condition_uncertainty,
     use_host_uncertainty = FALSE,
     weather_type = "probabilistic",
     temperature_coefficient_sd_file = paste0(cbs_path, "temp/sd_temp.tif"),
@@ -316,16 +315,20 @@ for (yr in seq(23, 31)) {
     start_with_soil_populations = FALSE,
     county_level_infection_data = FALSE
   )
+  simulation_uncert <- c(cbs_manage$simulation_mean, cbs_manage$simulation_sd)
+  names(simulation_uncert) <- c("sim_mean", "sim_sd")
+  file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_uncert", yr+1, ".tif")
+  writeRaster(simulation_uncert, file_name, overwrite=T)
   file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_probability", yr+1, ".tif")
-  writeRaster(cbs_manage$probability, file_name, overwrite=F)
+  writeRaster(cbs_manage$probability, file_name, overwrite=T)
   file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_mean", yr+1, ".tif")
-  writeRaster(cbs_manage$simulation_mean, file_name, overwrite=F)
+  writeRaster(cbs_manage$simulation_mean, file_name, overwrite=T)
   file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_sd", yr+1, ".tif")
-  writeRaster(cbs_manage$simulation_sd, file_name, overwrite=F)
+  writeRaster(cbs_manage$simulation_sd, file_name, overwrite=T)
   file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_min", yr+1, ".tif")
-  writeRaster(cbs_manage$simulation_min, file_name, overwrite=F)
+  writeRaster(cbs_manage$simulation_min, file_name, overwrite=T)
   file_name <- paste0(cbs_out, "pops_runs/manage/", "simulation_max", yr+1, ".tif")
-  writeRaster(cbs_manage$simulation_max, file_name, overwrite=F)
+  writeRaster(cbs_manage$simulation_max, file_name, overwrite=T)
   file_name <- paste0(cbs_out, "pops_runs/manage/", "multirun_outputs", yr+1, ".rdata")
   save(cbs_manage, file = file_name)
 }
