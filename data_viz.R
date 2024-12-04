@@ -267,6 +267,8 @@ library(tidyterra)
 library(USAboundaries)
 library(cowplot)
 library(ggspatial)
+library(sf)
+library(RColorBrewer)
 
 # Read in Forecasting files
 sim_sd_files <- list.files(paste0(cbs_out, "pops_runs/manage/"),
@@ -294,6 +296,18 @@ mean_stack <- rast(lapply(sim_mean_files, function(x) rast(x)))
 prob_stack <- rast(lapply(sim_prob_files, function(x) rast(x)))
 min_stack <- rast(lapply(sim_min_files, function(x) rast(x)))
 max_stack <- rast(lapply(sim_max_files, function(x) rast(x)))
+
+# Probability stack reclassification
+names(prob_stack) <- paste0("prob_", seq(2023,2050))
+prob_stack$prob_2050[prob_stack$prob_2049 >= 50 & prob_stack$prob_2048 >= 50 & prob_stack$prob_2047 >= 50 & prob_stack$prob_2046 >= 50 & prob_stack$prob_2045 >= 50] <- 2045
+prob_stack$prob_2050[prob_stack$prob_2044 >= 50 & prob_stack$prob_2043 >= 50 & prob_stack$prob_2042 >= 50 & prob_stack$prob_2041 >= 50 & prob_stack$prob_2040 >= 50] <- 2040
+prob_stack$prob_2050[prob_stack$prob_2039 >= 50 & prob_stack$prob_2038 >= 50 & prob_stack$prob_2037 >= 50 & prob_stack$prob_2036 >= 50 & prob_stack$prob_2035 >= 50] <- 2035
+prob_stack$prob_2050[prob_stack$prob_2034 >= 50 & prob_stack$prob_2033 >= 50 & prob_stack$prob_2032 >= 50 & prob_stack$prob_2031 >= 50 & prob_stack$prob_2030 >= 50] <- 2030
+prob_stack$prob_2050[prob_stack$prob_2029 >= 50 & prob_stack$prob_2028 >= 50 & prob_stack$prob_2027 >= 50 & prob_stack$prob_2026 >= 50 & prob_stack$prob_2025 >= 50] <- 2025
+prob_stack$prob_2050[prob_stack$prob_2050 >= 50 & prob_stack$prob_2050 < 2025] <- 2050
+prob_reclass <- prob_stack$prob_2050
+prob_reclass[prob_reclass < 50] <- 0
+unique(values(prob_reclass))
 
 sd_stack <- project(sd_stack, crs(fl_counties_highres))
 mean_stack <- project(mean_stack, crs(fl_counties_highres))
@@ -344,6 +358,57 @@ fl_projection <- state_plane("FL")
 fl_counties_highres <- st_transform(fl_counties_highres, fl_projection)
 fl_counties_cropped <- st_transform(fl_counties_cropped, fl_projection)
 
+# Threshold plot for managed infection probability 2023-2050
+fl_counties_highres %>% 
+  ggplot() + 
+  geom_sf() + 
+  theme(panel.background = element_rect(fill = NA), 
+        axis.text = element_blank(), 
+        axis.ticks = element_blank(),
+        legend.key.size = unit(0.5, units = "cm"),
+        legend.text = element_text(size = 6),
+        legend.title = element_text(size = 9),
+        legend.title.position = "top",
+        legend.margin = margin(0,0,0,0, unit = "cm"),
+        legend.position = "inside",
+        legend.position.inside = c(1,0.2),
+        legend.direction = "horizontal") +
+  annotation_scale(location = "br") +
+  layer_spatial(data = prob_reclass, na.rm = T) +
+  scale_fill_gradientn(na.value = NA, colors = rev(brewer.pal(7,"RdYlGn")),
+                       name = 'Infection Probability') +
+  geom_rect(xmin = st_bbox(fl_counties_cropped)[[1]],
+            ymin = st_bbox(fl_counties_cropped)[[2]],
+            xmax = st_bbox(fl_counties_cropped)[[3]],
+            ymax = st_bbox(fl_counties_cropped)[[4]],
+            fill = NA,
+            col = "black",
+            linewidth = 0.65)
+
+ggdraw() +
+  draw_plot(threshold_map) +
+  labs(title = "Infection Probability Density by 2050") + 
+  annotation_north_arrow(height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         location = 'tr',
+                         pad_y = unit(1, "in"),
+                         pad_x = unit(2.3, "in")) +
+  draw_plot(
+    {
+      threshold_map + 
+        coord_sf(
+          xlim = c(st_bbox(fl_counties_cropped)[[1]],
+                   st_bbox(fl_counties_cropped)[[3]]),
+          ylim = c(st_bbox(fl_counties_cropped)[[2]], 
+                   st_bbox(fl_counties_cropped)[[4]]),
+          expand = FALSE) +
+        theme(legend.position = "none")
+    },
+    x = 0.05, 
+    y = 0,
+    width = 0.6, 
+    height = 0.6)
+
 # Florida boundary plot
 plot_fl <- fl_counties_highres %>% 
   ggplot() + 
@@ -354,7 +419,7 @@ plot_fl <- fl_counties_highres %>%
         axis.ticks = element_blank(),
         legend.position = "topleft") +
   # annotation_scale(location = "br") +
-  layer_spatial(data = prob_stack[[10]], na.rm = T) +
+  layer_spatial(data = prob_stack[[28]], na.rm = T) +
   scale_fill_gradientn(na.value = NA, colors = rev(brewer.pal(7,"RdYlGn")),
                        name = 'Infection Probability')
 
@@ -380,15 +445,16 @@ main_map <- plot_fl + geom_rect(xmin = st_bbox(fl_counties_cropped)[[1]],
 # Plot study area as cropout of large boundary
 ggdraw() +
   draw_plot(main_map) +
+  labs(title = "Infection Probability Density 2050") + 
   annotation_north_arrow(height = unit(1, "cm"),
                          width = unit(1, "cm"),
-                         location = 'br',
-                         pad_y = unit(1, "cm"),
-                         pad_x = unit(0.5, "cm")) +
+                         location = 'tr',
+                         pad_y = unit(1, "in"),
+                         pad_x = unit(2.3, "in")) +
   draw_plot(
     {
       main_map + 
-        coord_sf(
+      coord_sf(
           xlim = c(st_bbox(fl_counties_cropped)[[1]],
                    st_bbox(fl_counties_cropped)[[3]]),
           ylim = c(st_bbox(fl_counties_cropped)[[2]], 
@@ -396,8 +462,8 @@ ggdraw() +
           expand = FALSE) +
         theme(legend.position = "none")
     },
-    x = 0, 
+    x = 0.05, 
     y = 0,
     width = 0.6, 
     height = 0.6)
-ggsave(filename = paste0(cbs_out, "infection_managed_inset.png"), width = 7, units = "in", dpi = 300)
+ggsave(filename = paste0(cbs_out, "infection_managed_2050_inset.png"), width = 7, units = "in", dpi = 300)

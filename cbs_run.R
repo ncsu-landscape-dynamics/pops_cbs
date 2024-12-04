@@ -127,8 +127,6 @@ cal11_22 <- bayesian_mnn_checks(cal11_21$posterior_means,
 parameter_means = cal11_22$posterior_means
 parameter_cov_matrix = cal11_22$posterior_cov_matrix
 
-number_of_cores = detectCores() - 1
-
 # Forecasting without preventative management
 start_time <- Sys.time()
 
@@ -170,7 +168,7 @@ cbs_nm <- pops_multirun(
   natural_dir = "NONE",
   anthropogenic_dir = "NONE",
   number_of_iterations = 100,
-  number_of_cores = number_of_cores,
+  number_of_cores = 26,
   pesticide_duration = 180,
   pesticide_efficacy = 0.829,
   random_seed = NULL,
@@ -273,7 +271,7 @@ for (yr in seq(22, 49)) {
     natural_dir = "NONE",
     anthropogenic_dir = "NONE",
     number_of_iterations = 100,
-    number_of_cores = number_of_cores,
+    number_of_cores = 14,
     pesticide_duration = 180,
     pesticide_efficacy = 0.829,
     random_seed = NULL,
