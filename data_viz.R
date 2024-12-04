@@ -334,10 +334,25 @@ sim_prob_nm <- rast(list.files(paste0(cbs_out, "pops_runs/no_management/"),
                         full.names = T))
 
 ggplot() +
-  geom_spatvector(data = c_clipped, size = 5, col = "white", fill = "lightgray") +
-  geom_spatraster(data = probs_clipped) +
+  geom_spatvector(data = fl_counties_highres, size = 5, col = "white", fill = "lightgray") +
+  geom_spatraster(data = prob_reclass) +
   facet_wrap(~lyr) +
   scale_fill_whitebox_c(
+    palette = "muted",
+    labels = scales::label_number(suffix = "%"),
+    n.breaks = 12,,
+    guide = guide_legend(reverse = T)) + 
+  coord_sf(crs = 4326) + 
+  theme_minimal() +
+  labs( fill = "") + 
+  theme(axis.text = element_text(size = 6),
+        panel.grid = element_blank()) +
+  ggtitle("Managed Infection Probability, Immokalee area, Florida (2023-2032)")
+
+ggplot() +
+  geom_spatvector(data = fl_counties_highres, size = 5, col = "white", fill = "lightgray") +
+  geom_spatraster(data = prob_reclass) +
+  scale_fill_whitebox_d(
     palette = "muted",
     labels = scales::label_number(suffix = "%"),
     n.breaks = 12,,
@@ -356,9 +371,58 @@ fl_counties_highres <- us_counties(states = "Florida", resolution = "high")
 fl_counties_cropped <- fl_counties_highres[fl_counties_highres$name == "Hendry" | fl_counties_highres$name == "Collier" | fl_counties_highres$name == "Lee" | fl_counties_highres$name == "Glades" | fl_counties_highres$name == "Charlotte", ]
 fl_projection <- state_plane("FL")
 fl_counties_highres <- st_transform(fl_counties_highres, fl_projection)
+fl_counties_highres <- vect(fl_counties_highres)
 fl_counties_cropped <- st_transform(fl_counties_cropped, fl_projection)
 
 # Threshold plot for managed infection probability 2023-2050
+pr_reclass <- as.factor(prob_reclass)
+pr_reclass[pr_reclass == 0] <- factor(2100)
+predCols <- brewer.pal(6, "RdYlBu")
+plot(fl_counties_highres, lwd = 1.5, xlim = c(-82.5, -80.88), ylim = c(26,27.2),
+     col = "white", background = "lightblue")
+text(fl_counties_highres, "name", cex = 0.75, halo = TRUE)
+plot(pr_reclass, xlim = c(-82.5, -80.88), ylim = c(26,27.2), colNA = NA, 
+     col = predCols, legend = T, breaks = c(2025,2030,2035,2040,2045,2050,2100),
+     plg=list(x="topleft", title = "Threshold year", lty = 1, cex = 0.8, 
+              lwd = 0.5, pch = 16, bty = "o", bg = "grey90"), add = T)
+inset(fl_counties_highres, border = "grey50", lwd = 0.5,
+      col = rep("grey90", length(fl_counties_highres$name)),
+      box = ext(c(-82.5, -80.88, 26, 27.2)), scale = 0.35, loc = "bottomleft",
+      background = "lightblue1", pbox = list(lwd = 2.5, lty = 6, col = "blue"))
+sbar(50, xy=c(-81.4,26), type = "bar", divs = 3, cex = 0.75)
+north(xy = c(-81,27), type = 2)
+
+
+plot(fl_counties_highres, lwd = 1.5, xlim = c(-82.5, -80.88), ylim = c(27.2,28.2),
+     col = "white", background = "lightblue")
+text(fl_counties_highres, "name", cex = 0.75, halo = TRUE)
+plot(pr_reclass, xlim = c(-82.5, -80.88), ylim = c(27.2,28.2), colNA = NA, 
+     col = predCols, legend = T, breaks = c(2025,2030,2035,2040,2045,2050,2100),
+     plg=list(x="topleft", title = "Threshold year", lty = 1, cex = 0.8, 
+              lwd = 0.5, pch = 16, bty = "o", bg = "grey90"), add = T)
+inset(fl_counties_highres, border = "grey50", lwd = 0.5,
+      col = rep("grey90", length(fl_counties_highres$name)),
+      box = ext(c(-82.5, -80.88, 27.2, 28.2)), scale = 0.25, loc = "bottomleft",
+      background = "lightblue1", pbox = list(lwd = 2.5, lty = 6, col = "blue"))
+sbar(50, xy=c(-81.4,27.2), type = "bar", divs = 3, cex = 0.75)
+north(xy = c(-81,28.1), type = 2)
+
+par(mfrow=c(2,1))
+
+plot(fl_counties_highres, lwd = 1.5, xlim = c(-82.5, -80.88), ylim = c(27.2,28.2),
+     col = "white", background = "lightblue")
+text(fl_counties_highres, "name", cex = 0.75, halo = TRUE)
+plot(pr_reclass, xlim = c(-82.5, -80.88), ylim = c(27.2,28.2), colNA = NA, 
+     col = predCols, legend = T, breaks = c(2025,2030,2035,2040,2045,2050,2100),
+     add = T)
+plot(fl_counties_highres, lwd = 1.5, xlim = c(-82.5, -80.88), ylim = c(26,27.2),
+     col = "white", background = "lightblue")
+text(fl_counties_highres, "name", cex = 0.75, halo = TRUE)
+plot(pr_reclass, xlim = c(-82.5, -80.88), ylim = c(26,27.2), colNA = NA, 
+     col = predCols, legend = T, breaks = c(2025,2030,2035,2040,2045,2050,2100),
+     add = T)
+
+
 fl_counties_highres %>% 
   ggplot() + 
   geom_sf() + 
