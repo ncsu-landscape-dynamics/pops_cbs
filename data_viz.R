@@ -8,7 +8,11 @@ library(tidyterra)
 cbs_path = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/"
 cbs_out = "Z:/Data/Raster/USA/pops_casestudies/citrus_black_spot/outputs/"
 
-load(paste0(cbs_out, "calibration_outputs_2010.erata"))
+for (year in seq(2010, 2021)) {
+  load(paste0(cbs_out, "calibration_outputs_", year, ".rdata"))
+}
+
+load(paste0(cbs_out, "calibration_outputs_2010.rdata"))
 
 posterior_means <- cal_2010$posterior_means
 raw_calibration_data <- as.data.frame(cal_2010$raw_calibration_data)
@@ -531,3 +535,198 @@ ggdraw() +
     width = 0.6, 
     height = 0.6)
 ggsave(filename = paste0(cbs_out, "infection_managed_2050_inset.png"), width = 7, units = "in", dpi = 300)
+
+# Parameter distribution figures
+# load calibration data
+load(paste0(cbs_path, "calibration_outputs_2010.rdata"))
+raw_2010 <- as.data.frame(cal_2010$raw_calibration_data)
+means2010 <- cal_2010$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2011.rdata"))
+raw_2011 <- as.data.frame(cal_2011$raw_calibration_data)
+means2011 <- cal_2011$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2012.rdata"))
+raw_2012 <- as.data.frame(cal_2012$raw_calibration_data)
+means2012 <- cal_2012$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2013.rdata"))
+raw_2013 <- as.data.frame(cal_2013$raw_calibration_data)
+means2013 <- cal_2013$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2014.rdata"))
+raw_2014 <- as.data.frame(cal_2014$raw_calibration_data)
+means2014 <- cal_2014$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2015.rdata"))
+raw_2015 <- as.data.frame(cal_2015$raw_calibration_data)
+means2015 <- cal_2015$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2016.rdata"))
+raw_2016 <- as.data.frame(cal_2016$raw_calibration_data)
+means2016 <- cal_2016$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2017.rdata"))
+raw_2017 <- as.data.frame(cal_2017$raw_calibration_data)
+means2017 <- cal_2017$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2018.rdata"))
+raw_2018 <- as.data.frame(cal_2018$raw_calibration_data)
+means2018 <- cal_2018$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2019.rdata"))
+raw_2019 <- as.data.frame(cal_2019$raw_calibration_data)
+means2019 <- cal_2019$posterior_means
+
+load(paste0(cbs_path, "calibration_outputs_2020.rdata"))
+raw_2020 <- as.data.frame(cal_2020$raw_calibration_data)
+means2020 <- cal_2020$posterior_means
+
+raw_data = as.data.frame(cbind(raw_2010[,1]/sd(raw_2010[,1]),
+                               raw_2011[,1]/sd(raw_2011[,1]), 
+                               raw_2012[,1]/sd(raw_2012[,1]),
+                               raw_2013[,1]/sd(raw_2013[,1]), 
+                               raw_2014[,1]/sd(raw_2014[,1]), 
+                               raw_2015[,1]/sd(raw_2015[,1]),
+                               raw_2016[,1]/sd(raw_2016[,1]), 
+                               raw_2017[,1]/sd(raw_2017[,1]), 
+                               raw_2018[,1]/sd(raw_2018[,1]),
+                               raw_2019[,1]/sd(raw_2019[,1]), 
+                               raw_2020[,1]/sd(raw_2020[,1])))
+
+# beautify plots for visualization
+ggplot(data = raw_data) +
+  geom_density(aes(x = V11, color="2020"), fill="#B2182B", alpha = 0.5) +
+  geom_density(aes(x = V9, color="2018"), fill="#EF8A62", alpha = 0.25) +
+  geom_density(aes(x = V7, color="2016"), fill="#FDDBC7", alpha = 0.5) +
+  geom_density(aes(x = V5, color="2014"), fill="#D1E5F0", alpha = 0.5) +
+  geom_density(aes(x = V3, color="2012"), fill="#67A9CF", alpha = 0.5) +
+  geom_density(aes(x = V1, color="2010"), fill="#2166AC", alpha = 0.5) +
+  xlab("") + ylab("density") + ggtitle('Distributions of Beta') +
+  theme(panel.border = element_blank(),
+        panel.spacing = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "inside",
+        legend.justification = "right") +
+  scale_x_continuous(limits = c(0, 5), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0.01)) +
+  scale_color_manual("Year", values = c('2020' = '#B2182B',
+                                '2018' = '#EF8A62',
+                                '2016' = '#FDDBC7',
+                                '2014' = '#D1E5F0',
+                                '2012' = '#67A9CF',
+                                '2010' = '#2166AC'))
+ggsave(filename = paste0(cbs_out, "beta_distributions.png"), dpi = 600)
+
+# beautify plots for visualization
+ggplot(data = raw_data) +
+  geom_density(aes(x = V4, color="2013"), fill="lightblue", alpha = 0.5) +
+  geom_density(aes(x = V5, color="2014"), fill="lightgrey", alpha = 0.5) +
+  geom_density(aes(x = V6, color="2015"), fill="lightpink", alpha = 0.25) +
+  xlab("Beta") + ylab("density") + ggtitle('Distributions of Beta') +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right") +
+  scale_color_manual(values = c('2013' = 'darkblue', '2014' = 'darkgrey',
+                                '2015' = 'maroon'))
+
+# beautify plots for visualization
+ggplot(data = raw_data) +
+  geom_density(aes(x = V7, color="2016"), fill="lightblue", alpha = 0.5) +
+  geom_density(aes(x = V8, color="2017"), fill="lightgrey", alpha = 0.5) +
+  geom_density(aes(x = V9, color="2018"), fill="lightpink", alpha = 0.25) +
+  xlab("Beta") + ylab("density") + ggtitle('Distributions of Beta') +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right") +
+  scale_color_manual(values = c('2016' = 'darkblue', '2017' = 'darkgrey',
+                                '2018' = 'maroon'))
+
+# beautify plots for visualization
+ggplot(data = raw_data) +
+  geom_density(aes(x = V10, color="2019"), fill="lightblue", alpha = 0.5) +
+  geom_density(aes(x = V11, color="2020"), fill="lightgrey", alpha = 0.5) +
+  xlab("Beta") + ylab("density") + ggtitle('Distributions of Beta') +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right") +
+  scale_color_manual(values = c('2019' = 'darkblue', '2020' = 'darkgrey'))
+
+# beautify plots for visualization
+ggplot(data = raw_data) +
+  geom_density(aes(x = V1, color="2010")) +
+  geom_density(aes(x = V2, color="2011")) +
+  geom_density(aes(x = V3, color="2012")) +
+  geom_density(aes(x = V4, color="2013")) +
+  geom_density(aes(x = V5, color="2014")) +
+  geom_density(aes(x = V6, color="2015")) +
+  geom_density(aes(x = V7, color="2016")) +
+  geom_density(aes(x = V8, color="2017")) +
+  geom_density(aes(x = V9, color="2018")) +
+  geom_density(aes(x = V10, color="2019")) +
+  geom_density(aes(x = V11, color="2020")) +
+  xlab("Beta") + ylab("density") + ggtitle('Distributions of Beta') +
+  theme(panel.border = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right")
+
+
+# Parameter distributions
+params <- as.data.frame(rbind(means2010, means2011, means2012, means2013, means2014, 
+                              means2015, means2016, means2017, means2018, means2019,
+                              means2020))
+
+ggplot(data = params) +
+  geom_density(aes(x = V1), fill="lightgrey", alpha = 0.5, linewidth = 1) +
+  xlab("Beta") + ylab("Probability density") + 
+  xlim(0.15, 0.26) + 
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right")
+
+ggplot(data = params) +
+  geom_density(aes(x = V2), fill="lightgrey", alpha = 0.5, linewidth = 1) +
+  xlab("Beta") + ylab("density") + ggtitle('Distribution of Beta') +
+  xlim(300, 500) + 
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right")
+
+ggplot(data = params) +
+  geom_density(aes(x = V3), fill="lightgrey", alpha = 0.5, linewidth = 1) +
+  xlab("Beta") + ylab("density") + ggtitle('Distribution of Beta') +
+  xlim(0.959, 0.963) + 
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right")
+
+ggplot(data = params) +
+  geom_density(aes(x = V4), fill="lightgrey", alpha = 0.5, linewidth = 1) +
+  xlab("Beta") + ylab("density") + ggtitle('Distribution of Beta') +
+  xlim(5300, 5600) +
+  theme(panel.border = element_blank(),
+        panel.background = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.line = element_line(size = 0.5, linetype = "solid"),
+        legend.position = "right")
